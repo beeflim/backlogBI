@@ -1,0 +1,60 @@
+Arguments: 
+  C:\Program Files (x86)\Nodist\v-x64\8.11.3\node.exe C:\Program Files (x86)\Nodist\bin\node_modules\yarn\bin\yarn.js add @nuxt/axios
+
+PATH: 
+  E:\project\backlogBI\node_modules\.bin;C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\ia32\compiler;C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64\compiler;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\Program Files\Common Files\Microsoft Shared\Windows Live;C:\Program Files (x86)\Common Files\Microsoft Shared\Windows Live;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files (x86)\Windows Live\Shared;C:\Program Files (x86)\QuickTime\QTSystem\;C:\ProgramData\ComposerSetup\bin;C:\Program Files\Microsoft SQL Server\130\Tools\Binn\;C:\Program Files\dotnet\;C:\Program Files (x86)\GtkSharp\2.12\bin;C:\Program Files (x86)\Nodist\bin;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\WINDOWS\System32\OpenSSH\;C:\Go\bin;E:\terraform_0.11.7_windows_amd64;C:\php-7.2.5-nts-Win32-VC15-x64;C:\HashiCorp\Vagrant\bin;C:\Program Files\NVIDIA Corporation\NVIDIA NvDLISR;C:\Program Files\PowerShell\6-preview\preview;C:\Program Files\Git\cmd;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Users\kenji\.cargo\bin;C:\Ruby25-x64\bin;C:\Users\kenji\AppData\Local\Programs\Python\Python36\Scripts\;C:\Users\kenji\AppData\Local\Programs\Python\Python36\;E:\php;E:\xampp\mysql\bin;C:\Program Files (x86)\Nodist\bin;C:\Users\kenji\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Microsoft VS Code\bin;E:\Go\projects\bin;C:\Program Files\Docker Toolbox;C:\Users\kenji\AppData\Local\Android\Sdk\platform-tools;;C:\Users\kenji\AppData\Local\Programs\Microsoft VS Code\bin
+
+Yarn version: 
+  1.13.0
+
+Node version: 
+  8.11.3
+
+Platform: 
+  win32 x64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/@nuxt%2faxios: Not found
+      at Request.params.callback [as _callback] (C:\Program Files (x86)\Nodist\bin\node_modules\yarn\lib\cli.js:66255:18)
+      at Request.self.callback (C:\Program Files (x86)\Nodist\bin\node_modules\yarn\lib\cli.js:129397:22)
+      at emitTwo (events.js:126:13)
+      at Request.emit (events.js:214:7)
+      at Request.<anonymous> (C:\Program Files (x86)\Nodist\bin\node_modules\yarn\lib\cli.js:130369:10)
+      at emitOne (events.js:116:13)
+      at Request.emit (events.js:211:7)
+      at IncomingMessage.<anonymous> (C:\Program Files (x86)\Nodist\bin\node_modules\yarn\lib\cli.js:130291:12)
+      at Object.onceWrapper (events.js:313:30)
+      at emitNone (events.js:111:20)
+
+npm manifest: 
+  {
+    "name": "backlogbi",
+    "version": "1.0.0",
+    "description": "Nuxt.js project",
+    "author": "beeflim <bee.flim.kt@gmail.com>",
+    "private": true,
+    "scripts": {
+      "dev": "nuxt",
+      "build": "nuxt build",
+      "start": "nuxt start",
+      "generate": "nuxt generate",
+      "lint": "eslint --ext .js,.vue --ignore-path .gitignore .",
+      "precommit": "npm run lint"
+    },
+    "dependencies": {
+      "nuxt": "^2.0.0"
+    },
+    "devDependencies": {
+      "babel-eslint": "^10.0.1",
+      "eslint": "^4.19.1",
+      "eslint-friendly-formatter": "^4.0.1",
+      "eslint-loader": "^2.1.1",
+      "eslint-plugin-vue": "^4.0.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
