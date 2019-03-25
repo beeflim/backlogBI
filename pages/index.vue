@@ -18,21 +18,26 @@
           target="_blank"
           class="button--grey">GitHub</a>
       </div>
+
+      <chart-component />
     </div>
   </section>
 </template>
 
 <script>
 import AppLogo from '~/components/AppLogo.vue'
-
+import Vue from 'vue'
+import HorizontalBarChart from '~/components/HorizontalBarChart'
 export default {
   components: {
-    AppLogo
+    AppLogo,
+    HorizontalBarChart
   },
   async mounted() {
     console.log(JSON.stringify(await this.$axios.$get('https://qiita.com/api/v2/items?query=tag:nuxt.js')));
   }
 }
+Vue.component('chart-component', HorizontalBarChart)
 </script>
 
 <style>

@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.4.1",
+    "chart.js": "^2.8.0",
     "element-ui": "^2.6.3",
-    "nuxt": "^2.0.0"
+    "nuxt": "^2.0.0",
+    "vue-chartjs": "^3.4.2"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.1",
