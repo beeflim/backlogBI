@@ -24,7 +24,7 @@
     </el-col>
     <el-col :span="6">
       <div class=" header-col header-col__select header-col__milestone">
-        <el-select v-model="milestoneId" placeholder="マイルストーンを選択してください">
+        <el-select v-model="milestoneId" @change="getIssueCount" placeholder="マイルストーンを選択してください">
           <el-option
             v-for="item in milestoneOption"
             :key="item.value"
@@ -36,7 +36,7 @@
     </el-col>
     <el-col :span="5">
       <div class=" header-col header-col__select">
-        <el-select v-model="chartId" placeholder="チャートを選択してください">
+        <el-select v-model="chartId" @change="saveChartId" placeholder="チャートを選択してください">
           <el-option
             v-for="item in chartOption"
             :key="item.value"
@@ -93,8 +93,9 @@
 
   /* Selectのレイアウト -------------------------------- */
   .header-col__milestone .el-select {
-    width:150%;
+    width: 150%;
   }
+
   .header-col-icon {
     height: 100%;
     margin-left: 10px;
@@ -151,8 +152,10 @@
        * プロジェクトが変更された時にマイルストーンに表示する内容を更新する。
        * @param event
        */
-      readMilestone: async function (event) {
+      readMilestone: function (event) {
         this.changeSelectForm(`/api/v2/projects/${this.$data.projectId}/versions`, 'milestoneOption', 'マイルストーン', true);
+        this.$data.milestoneId = '';
+        this.$data.chartId = '';
       },
       /**
        * セレクトボックスの情報を取得、更新する。
@@ -162,6 +165,14 @@
        * @returns {Promise<void>}
        */
       changeSelectForm: async function (uri, target, targetName, isMileStone) {
+        if (!localStorage.spaceName && !localStorage.token) {
+          this.$message({
+            message: 'データの取得をするので、スペース名とアクセストークンを設定してください。',
+            type: 'warning'
+          });
+          return;
+        }
+
         let url = `https://${localStorage.spaceName}.backlog.jp` + uri + `?apiKey=${localStorage.token}&archived=false`;
 
         await this.$axios.$get(url)
@@ -188,6 +199,57 @@
             console.log(e);
           }))
 
+      },
+      /**
+       * マイルストーンの課題の数を取得する。
+       * 課題APIでは最大100件までしか取得できないため
+       * @returns {Promise<void>}
+       */
+      getIssueCount: async function () {
+        this.$data.chartId = '';
+        let url = `https://${localStorage.spaceName}.backlog.jp` + '/api/v2/issues/count' + `?apiKey=${localStorage.token}&projectId[]=${this.$data.projectId}&milestoneId[]=${this.$data.milestoneId}`;
+
+        await this.$axios.$get(url)
+          .then((res) => {
+            this.$data.issueCount = res.count;
+          })
+          .catch((e => {
+            this.$message({
+              message: '課題の数を取得できませんでした',
+              type: 'warning'
+            });
+            console.log(e);
+          }))
+      },
+      /**
+       * 選択されているセレクトボックスの名前を取得する
+       * @param selectedId 選択されているID
+       * @param optionList セレクトのリスト
+       * @returns {string} 選択された文字
+       */
+      getSelectedName: function (selectedId, optionList) {
+        let selectedItem = optionList.filter(option => {
+          return option.value === selectedId
+        });
+
+        return selectedItem[0].label;
+      },
+      /**
+       * ストアに保存して、選択されたチャートにルーティングする
+       */
+      saveChartId: function () {
+
+        this.$store.commit('projectId', this.$data.projectId);
+        this.$store.commit('projectName', this.getSelectedName(this.$data.projectId, this.$data.projectOption));
+
+        this.$store.commit('milestoneId', this.$data.milestoneId);
+        this.$store.commit('milestoneName', this.getSelectedName(this.$data.milestoneId, this.$data.milestoneOption));
+
+        this.$store.commit('chartId', this.$data.chartId);
+        this.$store.commit('chartName', this.getSelectedName(this.$data.chartId, this.$data.chartOption));
+
+        this.$router.push(this.$data.chartId);
+
       }
     },
     data() {
@@ -208,7 +270,8 @@
           spaceName: '',
           token: ''
         },
-        formLabelWidth: '200px'
+        formLabelWidth: '200px',
+        issueCount: 0
       }
     }
   }
