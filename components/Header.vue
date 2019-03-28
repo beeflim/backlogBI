@@ -248,6 +248,8 @@
         this.$store.commit('chartId', this.$data.chartId);
         this.$store.commit('chartName', this.getSelectedName(this.$data.chartId, this.$data.chartOption));
 
+        this.$store.commit('issueCount', this.$data.issueCount);;
+
         this.$router.push(this.$data.chartId);
 
       }
@@ -262,6 +264,10 @@
           {
             value: "progress_chart",
             label: "進捗表"
+          },
+          {
+            value: "finish_ticket_chart",
+            label: "チケット消化状況"
           }
         ],
         chartId: '',

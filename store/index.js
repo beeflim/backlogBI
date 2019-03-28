@@ -8,30 +8,34 @@ const createStore = () => {
       chartId: '',
       projectName: '',
       milestoneName: '',
-      chartName: ''
+      chartName: '',
+      issueCount: ''
 
     }),
     mutations: {
-      projectId(state, id){
+      projectId(state, id) {
         state.projectId = id;
       },
-      milestoneId(state, id){
-        state.miprojectId = id;
+      milestoneId(state, id) {
+        state.milestoneId = id;
       },
-      chartId(state, id){
-        state.chartId= id;
+      chartId(state, id) {
+        state.chartId = id;
       },
-      projectName(state, id){
-        state.projectName = id;
+      projectName(state, name) {
+        state.projectName = name;
       },
-      milestoneName(state, id){
-        state.miprojectName = id;
+      milestoneName(state, name) {
+        state.milestoneName = name;
       },
-      chartName(state, id){
-        state.chartName= id;
+      chartName(state, name) {
+        state.chartName = name;
+      },
+      issueCount(state, cnt) {
+        state.issueCount = cnt;
       }
     }
   })
-}
+};
 
 export default createStore
