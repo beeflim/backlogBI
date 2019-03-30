@@ -156,12 +156,14 @@
         this.changeSelectForm(`/api/v2/projects/${this.$data.projectId}/versions`, 'milestoneOption', 'マイルストーン', true);
         this.$data.milestoneId = '';
         this.$data.chartId = '';
+        this.$router.push('/');
       },
       /**
        * セレクトボックスの情報を取得、更新する。
        * @param uri APIのURI
        * @param target 更新するセレクトボックスのData名
        * @param targetName エラーメッセージ等に出す名称
+       * @param isMileStone マイルストーンの設定があるかどうか
        * @returns {Promise<void>}
        */
       changeSelectForm: async function (uri, target, targetName, isMileStone) {
@@ -206,6 +208,7 @@
        * @returns {Promise<void>}
        */
       getIssueCount: async function () {
+        this.$router.push('/');
         this.$data.chartId = '';
         let url = `https://${localStorage.spaceName}.backlog.jp` + '/api/v2/issues/count' + `?apiKey=${localStorage.token}&projectId[]=${this.$data.projectId}&milestoneId[]=${this.$data.milestoneId}`;
 
@@ -248,7 +251,7 @@
         this.$store.commit('chartId', this.$data.chartId);
         this.$store.commit('chartName', this.getSelectedName(this.$data.chartId, this.$data.chartOption));
 
-        this.$store.commit('issueCount', this.$data.issueCount);;
+        this.$store.commit('issueCount', this.$data.issueCount);
 
         this.$router.push(this.$data.chartId);
 

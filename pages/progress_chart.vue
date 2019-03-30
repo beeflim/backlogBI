@@ -13,7 +13,6 @@
 
 <script>
   import AppLogo from '~/components/AppLogo.vue'
-  import Vue from 'vue'
   import LineChart from '@/components/chart/LineChart.vue'
 
   export default {
@@ -23,7 +22,10 @@
     props: {
       labels: [],
       estimatedData: [],
-      finishedData: []
+      finishedData: [],
+      safetyLine: [],
+      warningLine: [],
+      maxLine: []
     },
     async mounted() {
       let issueData = await this.getAllIssueData();
@@ -37,22 +39,57 @@
           datasets: [
             {
               label: "完了 工数(時)",
-              borderColor:'rgba(86,167,100,1)',
-              backgroundColor:'rgba(86,167,100,0.1)',
-              borderWidth:'3',
-              pointBackgroundColor:'rgba(186,267,200,1)',
-              pointBorderColor:'rgba(86,167,100,1)',
+              borderColor: 'rgba(86,167,100,1)',
+              backgroundColor: 'rgba(86,167,100,0.1)',
+              borderWidth: '3',
+              fill: false,
+              pointStyle: 'line',
+              pointBackgroundColor: 'rgba(186,267,200,1)',
+              pointBorderColor: 'rgba(86,167,100,1)',
               data: this.$props.finishedData
             },
             {
               label: "予定 工数(時)",
-              borderColor:'rgba(204,82,139,1)',
-              backgroundColor:'rgba(204,82,139,0.1)',
-              borderWidth:'3',
-              pointBackgroundColor:'rgba(1204,82,139,1)',
-              pointBorderColor:'rgba(204,82,139,1)',
+              borderColor: 'rgba(182,182,182,1)',
+              backgroundColor: 'rgba(182,182,182,0.1)',
+              fill: false,
+              borderWidth: '3',
+              pointStyle: 'line',
+              pointBackgroundColor: 'rgba(182,182,182,1)',
+              pointBorderColor: 'rgba(182,182,182,1)',
               data: this.$props.estimatedData
+            },
+            {
+              label: "安全性",
+              borderColor: 'rgba(86,167,100,1)',
+              backgroundColor: 'rgba(86,167,100,0.1)',
+              borderWidth: '1',
+              pointStyle: 'line',
+              fill: 'origin',
+              pointBorderWidth: 0,
+              data: this.$props.safetyLine
+            },
+            {
+              label: "危険性",
+              borderColor: 'rgba(204,82,139,1)',
+              backgroundColor: 'rgba(204,82,139,0.1)',
+              borderWidth: '1',
+              pointStyle: 'line',
+              fill: 4,
+              pointBorderWidth: 0,
+              data: this.$props.warningLine
+            },
+            {
+              label: "",
+              borderColor: 'rgba(204,82,139,1)',
+              backgroundColor: 'rgba(204,82,139,0.1)',
+              borderWidth: '0',
+              pointStyle: 'line',
+              pointBorderWidth: 0,
+              fill: false,
+              data: this.$props.maxLine
             }
+
           ]
         }
       }, lineOptions: function () {
@@ -116,50 +153,59 @@
        * @param issueData APIで取得した課題データ
        */
       format: function (issueData) {
+
         let labels = [];
 
         // 予定データ
         let estimatedData = [];
+        // 累積用に使う
         let estimatedSize = 0;
 
         // 完了データ
         let finishedData = [];
+        // 累積用に使う
         let finishSize = 0;
 
-        //完了日が未設定野場合
+        //完了日が未設定の場合は、値を纏める。
         let unSetestimatedSize = 0;
         let unSetfinishSize = 0;
         let hasUnSetData = false;
 
         Object.keys(issueData).forEach(function (key) {
+          if (estimatedData.length === 0) {
+            estimatedData.push(0);
+            finishedData.push(0);
+            labels.push(issueData[key].milestone[0].startDate.substring(5, 10).replace(/-/g, '/'));
+          }
+
           // 完了日が設定されている場合
           if (issueData[key].dueDate) {
             // ラベルの設定
             let hasLabel = false;
-            let labelName = issueData[key].dueDate.substring(5, 10).replace(/-/g, '/')
+            let labelName = issueData[key].dueDate.substring(5, 10).replace(/-/g, '/');
 
-            if (labels.indexOf(labelName) >= 0){
+            if (labels.indexOf(labelName) >= 0) {
               hasLabel = true;
-            }else{
+            } else {
               hasLabel = false;
-              labels.push(labelName );
+              labels.push(labelName);
             }
 
 
             // 予定工数を登録
             estimatedSize += issueData[key].estimatedHours;
-            if(hasLabel){
-              estimatedData[estimatedData.length -1] = Math.round(estimatedSize * 100) / 100;
-            }else {
+            if (hasLabel) {
+              estimatedData[estimatedData.length - 1] = Math.round(estimatedSize * 100) / 100;
+            } else {
               estimatedData.push(Math.round(estimatedSize * 100) / 100);
             }
 
             // 完了工数を登録
             finishSize += issueData[key].actualHours;
             if (issueData[key].status.name === '完了') {
-              if(hasLabel){
-                finishedData[finishedData.length -1] = finishSize;
-              }else {
+              if (hasLabel) {
+                finishedData[finishedData.length - 1] = finishSize;
+              } else {
                 finishedData.push(Math.round(finishSize * 100) / 100);
               }
             }
@@ -172,6 +218,35 @@
 
         });
 
+        // 安全性を示す直線を作成する
+        let magnification = Math.round(estimatedData[estimatedData.length - 1] / labels.length);
+
+        let safetyLine = [];
+        let warningLine = [];
+        let maxLine = [];
+
+        //安全性の曲線の初期値
+        const BASE_NUM = estimatedData[estimatedData.length - 1] / 5;
+
+        //安全性と危険性のラインを作成する。
+        for (let i = 0; i < labels.length; i++) {
+
+          let safeNum = magnification * i - BASE_NUM;
+
+          safetyLine.push(safeNum > 0 ? safeNum : 0);
+          warningLine.push(magnification * i + BASE_NUM)
+        }
+
+        //危険性のfillを出すために、上部にラインを作成する
+        let maxNum = estimatedData[estimatedData.length - 1] > finishedData[finishedData.length - 1] ? estimatedData[estimatedData.length - 1] : finishedData[finishedData.length - 1];
+
+        maxNum = (Math.floor(maxNum / 20)) * 20 + 20;
+        maxNum = warningLine[warningLine.length - 1] > maxNum ? warningLine[warningLine.length - 1] : maxNum;
+        labels.forEach(() => {
+          maxLine.push(maxNum);
+        });
+
+
         // 未設定がある場合
         if (hasUnSetData) {
           labels.push('未設定');
@@ -182,6 +257,9 @@
         this.$props.labels = labels;
         this.$props.estimatedData = estimatedData;
         this.$props.finishedData = finishedData;
+        this.$props.safetyLine = safetyLine;
+        this.$props.warningLine = warningLine;
+        this.$props.maxLine = maxLine;
 
       }
     }
