@@ -32,6 +32,9 @@
       issueData = this.format(issueData);
     },
     methods: {
+      /**
+       * チャートの色などを指定する
+       */
       writeLineChart: function () {
 
         return {
@@ -95,6 +98,10 @@
       }, lineOptions: function () {
         return {}
       },
+      /**
+       * 課題データを取得する。
+       * 100件までしか取得できない。
+       */
       getIssueData: async function (issueList) {
 
         //一度に課題の数
@@ -134,6 +141,10 @@
 
         return size;
       },
+      /**
+       * 課題データを取得する。
+       * マイルストーンに設定されているものすべてを取得
+       */
       getAllIssueData: async function () {
         // 課題の件数
         let issueCount = this.$store.state.issueCount;
@@ -149,11 +160,10 @@
         return issueList;
       },
       /**
-       * chartようにデータを成型する
-       * @param issueData APIで取得した課題データ
+       * メインとなるデータを作成する
+       * @param issueData
        */
-      format: function (issueData) {
-
+      formatMainData: function (issueData) {
         let labels = [];
 
         // 予定データ
@@ -171,18 +181,23 @@
         let unSetfinishSize = 0;
         let hasUnSetData = false;
 
+        let firstDate = '';
+
+        //ラベルの幅をこの値毎にする
+        const LABEL_WIDTH = 5;
+
         Object.keys(issueData).forEach(function (key) {
-          if (estimatedData.length === 0) {
-            estimatedData.push(0);
-            finishedData.push(0);
-            labels.push(issueData[key].milestone[0].startDate.substring(5, 10).replace(/-/g, '/'));
-          }
 
           // 完了日が設定されている場合
           if (issueData[key].dueDate) {
+
             // ラベルの設定
             let hasLabel = false;
             let labelName = issueData[key].dueDate.substring(5, 10).replace(/-/g, '/');
+
+            if (labels.length === 0) {
+              firstDate = issueData[key].dueDate.substring(0, 10).replace(/-/g, '/')
+            }
 
             if (labels.indexOf(labelName) >= 0) {
               hasLabel = true;
@@ -190,7 +205,6 @@
               hasLabel = false;
               labels.push(labelName);
             }
-
 
             // 予定工数を登録
             estimatedSize += issueData[key].estimatedHours;
@@ -218,14 +232,40 @@
 
         });
 
-        // 安全性を示す直線を作成する
-        let magnification = Math.round(estimatedData[estimatedData.length - 1] / labels.length);
+        // 日付が初期の物を作成する
+        let firstDateList = firstDate.split('/');
+        let fDate = new Date(firstDateList[0], firstDateList[1], firstDateList[2]);
+        fDate.setDate(fDate.getDate() - LABEL_WIDTH);
+        estimatedData.unshift(0);
+        finishedData.unshift(0);
 
+        return {
+          'labels': labels,
+          'estimatedData': estimatedData,
+          'estimatedSize': estimatedSize,
+          'finishedData': finishedData,
+          'finishSize': finishSize,
+          'unSetestimatedSize': unSetestimatedSize,
+          'unSetfinishSize': unSetfinishSize,
+          'hasUnSetData': hasUnSetData
+        }
+      },
+      /**
+       * 安全、危険のラインを引く
+       * @param labels
+       * @param estimatedData
+       * @param finishedData
+       */
+      formatSupportData: function (labels, estimatedData, finishedData) {
         let safetyLine = [];
         let warningLine = [];
         let maxLine = [];
 
+        // 安全性を示す直線を作成する
+        let magnification = Math.round(estimatedData[estimatedData.length - 1] / labels.length);
+
         //安全性の曲線の初期値
+        //TODO 要調整
         const BASE_NUM = estimatedData[estimatedData.length - 1] / 5;
 
         //安全性と危険性のラインを作成する。
@@ -240,12 +280,46 @@
         //危険性のfillを出すために、上部にラインを作成する
         let maxNum = estimatedData[estimatedData.length - 1] > finishedData[finishedData.length - 1] ? estimatedData[estimatedData.length - 1] : finishedData[finishedData.length - 1];
 
+        //TODO 要調整
         maxNum = (Math.floor(maxNum / 20)) * 20 + 20;
         maxNum = warningLine[warningLine.length - 1] > maxNum ? warningLine[warningLine.length - 1] : maxNum;
         labels.forEach(() => {
           maxLine.push(maxNum);
         });
 
+        return {
+          'safetyLine': safetyLine,
+          'warningLine': warningLine,
+          'maxLine': maxLine
+        }
+
+      },
+      /**
+       * chartで表示ができるようにデータを成型する
+       * @param issueData APIで取得した課題データ
+       */
+      format: function (issueData) {
+
+
+        let mainData = this.formatMainData(issueData);
+
+        let labels = mainData.labels;
+
+        let estimatedData = mainData.estimatedData;
+        let estimatedSize = mainData.estimatedSize;
+
+        let finishSize = mainData.finishSize;
+        let finishedData = mainData.finishedData;
+
+        let unSetestimatedSize = mainData.unSetestimatedSize;
+        let unSetfinishSize = mainData.unSetfinishSize;
+        let hasUnSetData = mainData.hasUnSetData;
+
+        let supportData = this.formatSupportData(labels, estimatedData, finishedData);
+
+        let safetyLine = supportData.safetyLine;
+        let warningLine = supportData.warningLine;
+        let maxLine = supportData.maxLine;
 
         // 未設定がある場合
         if (hasUnSetData) {
