@@ -47,7 +47,7 @@
       </div>
     </el-col>
     <el-col :span="4">
-      <div class=" header-col">Option</div>
+      <div class=" header-col"></div>
     </el-col>
     <el-col :span="1">
       <i @click="dialogFormVisible = true" class="el-icon-more"></i>

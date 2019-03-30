@@ -3,23 +3,11 @@
     <div>
       <app-logo/>
       <h1 class="title">
-        backlogbi
+        backlog bi
       </h1>
       <h2 class="subtitle">
-        Nuxt.js project
+        Ticket => chart
       </h2>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          class="button--green">Documentation</a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          class="button--grey">GitHub</a>
-      </div>
-
-      <chart-component />
     </div>
   </section>
 </template>
@@ -27,22 +15,16 @@
 <script>
 import AppLogo from '~/components/AppLogo.vue'
 import Vue from 'vue'
-import HorizontalBarChart from '~/components/HorizontalBarChart'
 export default {
   components: {
     AppLogo,
-    HorizontalBarChart
-  },
-  async mounted() {
-
   }
 }
-Vue.component('chart-component', HorizontalBarChart)
 </script>
 
 <style>
 .container {
-  min-height: 100vh;
+  min-height: 90vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -66,8 +48,5 @@ Vue.component('chart-component', HorizontalBarChart)
   padding-bottom: 15px;
 }
 
-.links {
-  padding-top: 15px;
-}
 </style>
 
