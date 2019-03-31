@@ -3,41 +3,28 @@
     <div>
       <app-logo/>
       <h1 class="title">
-        backlogbi
+        backlog bi
       </h1>
       <h2 class="subtitle">
-        Nuxt.js project
+        Ticket => chart
       </h2>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          class="button--green">Documentation</a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          class="button--grey">GitHub</a>
-      </div>
     </div>
   </section>
 </template>
 
 <script>
 import AppLogo from '~/components/AppLogo.vue'
-
+import Vue from 'vue'
 export default {
   components: {
-    AppLogo
-  },
-  async mounted() {
-    console.log(JSON.stringify(await this.$axios.$get('https://qiita.com/api/v2/items?query=tag:nuxt.js')));
+    AppLogo,
   }
 }
 </script>
 
 <style>
 .container {
-  min-height: 100vh;
+  min-height: 90vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -61,8 +48,5 @@ export default {
   padding-bottom: 15px;
 }
 
-.links {
-  padding-top: 15px;
-}
 </style>
 
