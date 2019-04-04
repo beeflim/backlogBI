@@ -75,7 +75,7 @@ export default {
             data: this.$data.estimatedData
           },
           {
-            label: "予想",
+            label: "予想 工数(時)",
             borderColor: "rgba(255,82,139,1)",
             backgroundColor: "rgba(255,82,139,0.1)",
             borderWidth: "3",
@@ -219,12 +219,11 @@ export default {
       let unSetfinishSize = 0;
       let hasUnSetData = false;
 
-      let firstDate = "";
-
       //ラベルの幅をこの値毎にする
       const LABEL_WIDTH = 5;
 
       let labelDateSince = "";
+      let labelworkSince = "";
       let labelDateUntil = "";
 
       // ticketの最小最大の終了日を取得する
@@ -233,13 +232,14 @@ export default {
           let due = issueData[key].dueDate.substring(0, 10).split("-");
           if (!labelDateSince) {
             labelDateSince = new Date(due[0], due[1], due[2]);
+            labelworkSince = new Date(due[0], due[1], due[2]);
           }
           labelDateUntil = new Date(due[0], due[1], due[2]);
         }
       });
+      labelDateUntil.setDate(labelDateUntil.getDate() + LABEL_WIDTH);
 
       let differenceLime = [];
-
       //LABEL_WIDTH毎にチケットデータを纏める
       for (
         let xDate = labelDateSince;
@@ -259,18 +259,22 @@ export default {
               if (values.status.name === "完了") {
                 finishSize += values.actualHours;
                 expectSize += values.actualHours;
+
+                // 完了の時、予定よりどのぐらいの倍率で完了したかを計算する
+                expectComp =
+                  Math.round(
+                    ((values.actualHours / values.estimatedHours + expectComp) /
+                      2) *
+                      100
+                  ) / 100;
+                if (expectComp > 1.5) {
+                  expectComp = 1.5;
+                } else if (expectComp != 0 && expectComp < 0.5) {
+                  expectComp = 0.5;
+                }
               } else {
                 //予想データを加算
-                if (values.estimatedSize !== 0) {
-                  expectComp =
-                    Math.round(
-                      ((values.actualHours / values.estimatedSize +
-                        expectComp) /
-                        2) *
-                        100
-                    ) / 100;
-                }
-                expectSize += values.actualHours * expectSize;
+                expectSize += values.estimatedHours * expectComp;
               }
 
               hasfinishData =
@@ -318,13 +322,10 @@ export default {
       });
 
       // 日付が初期の物を作成する
-      let firstDateList = firstDate.split("/");
-      let fDate = new Date(
-        firstDateList[0],
-        firstDateList[1],
-        firstDateList[2]
+      labelworkSince.setDate(labelworkSince.getDate() - LABEL_WIDTH);
+      labels.unshift(
+        labelworkSince.getMonth() + "/" + labelworkSince.getDate()
       );
-      fDate.setDate(fDate.getDate() - LABEL_WIDTH);
       estimatedData.unshift(0);
       finishedData.unshift(0);
       expectData.unshift(0);
