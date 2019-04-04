@@ -142,7 +142,7 @@ export default {
       // 予想データ
       let expectData = [];
       let expectSize = 0;
-      let expectComp = 0;
+      let expectComp = 1;
 
       //完了日が未設定の場合は、値を纏める。
       let unSetestimatedSize = 0;
