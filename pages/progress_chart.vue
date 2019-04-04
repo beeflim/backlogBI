@@ -20,19 +20,25 @@ export default {
     AppLogo,
     LineChart
   },
+  props: {
+    p_labels: [],
+    p_estimatedData: [],
+    p_finishedData: [],
+    p_safetyLine: [],
+    p_warningLine: [],
+    p_maxLine: [],
+    p_expectData: []
+  },
   data() {
     return {
-      test: "初期"
+      labels: this.p_labels,
+      estimatedData: this.p_estimatedData,
+      finishedData: this.p_finishedData,
+      safetyLine: this.p_safetyLine,
+      warningLine: this.p_warningLine,
+      maxLine: this.p_maxLine,
+      expectData: this.p_expectData
     };
-  },
-  props: {
-    labels: [],
-    estimatedData: [],
-    finishedData: [],
-    safetyLine: [],
-    warningLine: [],
-    maxLine: [],
-    expectData: []
   },
   async mounted() {
     let issueData = await this.getAllIssueData();
@@ -43,9 +49,8 @@ export default {
      * チャートの色などを指定する
      */
     writeLineChart: function() {
-      console.log(this.$data.test);
       return {
-        labels: this.$props.labels,
+        labels: this.$data.labels,
         datasets: [
           {
             label: "完了 工数(時)",
@@ -56,7 +61,7 @@ export default {
             pointStyle: "dotted",
             pointBackgroundColor: "rgba(186,267,200,1)",
             pointBorderColor: "rgba(86,167,100,1)",
-            data: this.$props.finishedData
+            data: this.$data.finishedData
           },
           {
             label: "予定 工数(時)",
@@ -67,7 +72,7 @@ export default {
             pointStyle: "dotted",
             pointBackgroundColor: "rgba(182,182,182,1)",
             pointBorderColor: "rgba(182,182,182,1)",
-            data: this.$props.estimatedData
+            data: this.$data.estimatedData
           },
           {
             label: "予想",
@@ -78,7 +83,7 @@ export default {
             fill: false,
             pointBackgroundColor: "rgba(255,82,139,1)",
             pointBorderColor: "rgba(255,82,139,1)",
-            data: this.$props.expectData
+            data: this.$data.expectData
           },
           {
             label: "安全性",
@@ -88,7 +93,7 @@ export default {
             pointStyle: "line",
             fill: "origin",
             pointBorderWidth: 0,
-            data: this.$props.safetyLine
+            data: this.$data.safetyLine
           },
           {
             label: "危険性",
@@ -98,7 +103,7 @@ export default {
             pointStyle: "line",
             fill: 5,
             pointBorderWidth: 0,
-            data: this.$props.warningLine
+            data: this.$data.warningLine
           },
           {
             label: "",
@@ -108,7 +113,7 @@ export default {
             pointStyle: "line",
             pointBorderWidth: 0,
             fill: false,
-            data: this.$props.maxLine
+            data: this.$data.maxLine
           }
         ]
       };
@@ -434,13 +439,13 @@ export default {
       let warningLine = supportData.warningLine;
       let maxLine = supportData.maxLine;
 
-      this.$props.labels = labels;
-      this.$props.estimatedData = estimatedData;
-      this.$props.finishedData = finishedData;
-      this.$props.safetyLine = safetyLine;
-      this.$props.warningLine = warningLine;
-      this.$props.maxLine = maxLine;
-      this.$props.expectData = expectData;
+      this.$data.labels = labels;
+      this.$data.estimatedData = estimatedData;
+      this.$data.finishedData = finishedData;
+      this.$data.safetyLine = safetyLine;
+      this.$data.warningLine = warningLine;
+      this.$data.maxLine = maxLine;
+      this.$data.expectData = expectData;
     }
   }
 };
