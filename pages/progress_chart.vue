@@ -45,15 +45,17 @@ export default {
   async mounted() {
     //mixin のメソッドを使用してデータを作成します
     let issueData = await this.getAllIssueData();
-    let formatedData = this.formatBarUp(issueData);
+    if(issueData.length >0) {
+      let formatedData = this.formatBarUp(issueData);
 
-    this.$data.labels = formatedData.labels;
-    this.$data.estimatedData = formatedData.estimatedData;
-    this.$data.finishedData = formatedData.finishedData;
-    this.$data.safetyLine = formatedData.safetyLine;
-    this.$data.warningLine = formatedData.warningLine;
-    this.$data.maxLine = formatedData.maxLine;
-    this.$data.expectData = formatedData.expectData;
+      this.$data.labels = formatedData.labels;
+      this.$data.estimatedData = formatedData.estimatedData;
+      this.$data.finishedData = formatedData.finishedData;
+      this.$data.safetyLine = formatedData.safetyLine;
+      this.$data.warningLine = formatedData.warningLine;
+      this.$data.maxLine = formatedData.maxLine;
+      this.$data.expectData = formatedData.expectData;
+    }
   },
   methods: {
     /**
