@@ -18,14 +18,16 @@
 
 <script>
   import AppLogo from '~/components/AppLogo.vue'
-  import Vue from 'vue'
-  import HorizontalBarChart from '~/components/HorizontalBarChart'
+  import ReadUserData from "@/components/methods/ReadUserData.vue";
 
   export default {
+    mixins: [ReadUserData],
     components: {
       AppLogo
     },
     async mounted() {
+      let data = await this.getProjectUsers(this.$store.state.projectId);
+      console.log(data);
     }
   }
 
