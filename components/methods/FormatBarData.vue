@@ -46,10 +46,14 @@
             labelDateUntil = new Date(due[0], due[1] - 1, due[2]);
           }
         });
+
+        if (!labelDateSince && !labelDateSince) {
+          return 0;
+        }
         // 現在日がラベルに入るようにする。
         // ただし、最終日が過ぎていないことを条件とする
         let targetDate = new Date();
-        let isDoingProject  = false;
+        let isDoingProject = false;
         if (labelDateUntil > targetDate) {
 
           while (targetDate > labelDateSince) {
@@ -138,7 +142,7 @@
         labels.unshift(
           (labelworkSince.getMonth() + 1) + "/" + labelworkSince.getDate()
         );
-        if(!isDoingProject){
+        if (!isDoingProject) {
           estimatedData.unshift(0);
           finishedData.unshift(0);
           expectData.unshift(0);
@@ -177,8 +181,8 @@
 
         //安全性の曲線の初期値
         //TODO 要調整
-        const BASE_NUM = 20; //estimatedData[estimatedData.length - 1] / 3;
-        const WARN_BASE_NUM = 20; ///estimatedData[estimatedData.length - 1] / 8;
+        const BASE_NUM = estimatedData[estimatedData.length - 1] / 3;
+        const WARN_BASE_NUM = estimatedData[estimatedData.length - 1] / 8;
 
         //安全性と危険性のラインを作成する。
         for (let i = 0; i < labels.length; i++) {
@@ -196,10 +200,11 @@
             : finishedData[finishedData.length - 1];
 
         //TODO 要調整
-        maxNum = Math.floor(maxNum / 20) * 20 + 20;
+        const MAX_NUM_BASE = 20;
+        maxNum = Math.floor(maxNum / MAX_NUM_BASE) * MAX_NUM_BASE + MAX_NUM_BASE;
         maxNum =
           warningLine[warningLine.length - 1] > maxNum
-            ? warningLine[warningLine.length - 1]
+            ? warningLine[warningLine.length - 1] + MAX_NUM_BASE
             : maxNum;
         labels.forEach(() => {
           maxLine.push(maxNum);
@@ -220,7 +225,9 @@
       formatBarUp: function (issueData) {
         //メインデータを取得する
         let mainData = this.formatBarUpMainData(issueData);
-
+        if (mainData === 0) {
+          return 0;
+        }
         let labels = mainData.labels;
 
         let estimatedData = mainData.estimatedData;
