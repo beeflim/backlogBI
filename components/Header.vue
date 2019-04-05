@@ -52,16 +52,16 @@
 
       <el-dialog title="Setting" :visible.sync="dialogFormVisible">
         <el-form :model="form">
-          <el-form-item label="スペース名" :label-width="formLabelWidth">
+          <el-form-item label="スペース名(必須)" :label-width="formLabelWidth">
             <el-input v-model="form.spaceName" autocomplete="off"></el-input>
           </el-form-item>
-          <el-form-item label="アクセストークン" :label-width="formLabelWidth">
+          <el-form-item label="アクセストークン（必須）" :label-width="formLabelWidth">
             <el-input v-model="form.token" autocomplete="off"></el-input>
           </el-form-item>
-          <el-form-item label="一日の稼働時間（Hour）" :label-width="formLabelWidth">
+          <el-form-item label="一日の稼働時間（Hour）:初期位 8" :label-width="formLabelWidth">
             <el-input v-model="form.operatingTime" autocomplete="off"></el-input>
           </el-form-item>
-          <el-form-item label="一人あたりの時給(万円)" :label-width="formLabelWidth">
+          <el-form-item label="一人あたりの時給(万円)：初期値 0.6" :label-width="formLabelWidth">
             <el-input v-model="form.hourlySalary" autocomplete="off"></el-input>
           </el-form-item>
         </el-form>
@@ -143,7 +143,7 @@ export default {
       localStorage.spaceName = this.$data.form["spaceName"];
       localStorage.token = this.$data.form["token"];
       localStorage.operatingTime = this.$data.form["operatingTime"]?this.$data.form["operatingTime"]:8;
-      localStorage.hourlySalary = this.$data.form["hourlySalary"]?this.$data.form["hourlySalary"]:8;
+      localStorage.hourlySalary = this.$data.form["hourlySalary"]?this.$data.form["hourlySalary"]:0.6;
 
       this.readProjectNames();
     },

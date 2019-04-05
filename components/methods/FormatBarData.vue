@@ -1,266 +1,272 @@
 <script>
-export default {
-  methods: {
-    /**
-     * メインとなるデータを作成する
-     * @param issueData
-     */
-    formatBarUpMainData: function(issueData) {
-      let labels = [];
+  export default {
+    methods: {
+      /**
+       * メインとなるデータを作成する
+       * @param issueData
+       */
+      formatBarUpMainData: function (issueData) {
+        let labels = [];
 
-      // 予定データ
-      let estimatedData = [];
-      // 累積用に使う
-      let estimatedSize = 0;
+        // 予定データ
+        let estimatedData = [];
+        // 累積用に使う
+        let estimatedSize = 0;
 
-      // 完了データ
-      let finishedData = [];
-      // 累積用に使う
-      let finishSize = 0;
+        // 完了データ
+        let finishedData = [];
+        // 累積用に使う
+        let finishSize = 0;
 
-      // 予想データ
-      let expectData = [];
-      let expectSize = 0;
-      let expectComp = 1;
+        // 予想データ
+        let expectData = [];
+        let expectSize = 0;
+        let expectComp = 1;
 
-      //完了日が未設定の場合は、値を纏める。
-      let unSetestimatedSize = 0;
-      let unSetfinishSize = 0;
-      let hasUnSetData = false;
+        //完了日が未設定の場合は、値を纏める。
+        let unSetestimatedSize = 0;
+        let unSetfinishSize = 0;
+        let hasUnSetData = false;
 
-      //ラベルの幅をこの値毎にする
-      const LABEL_WIDTH = 5;
+        //ラベルの幅をこの値毎にする
+        const LABEL_WIDTH = 5;
 
-      let labelDateSince = "";
-      let labelworkSince = "";
-      let labelDateUntil = "";
+        let labelDateSince = "";
+        let labelworkSince = "";
+        let labelDateUntil = "";
 
-      // ticketの最小最大の終了日を取得する
-      Object.keys(issueData).forEach(key => {
-        if (issueData[key].dueDate) {
-          let due = issueData[key].dueDate.substring(0, 10).split("-");
-          if (!labelDateSince) {
-            labelDateSince = new Date(due[0], due[1], due[2]);
-            labelworkSince = new Date(due[0], due[1], due[2]);
+        // ticketの最小最大の終了日を取得する
+        Object.keys(issueData).forEach(key => {
+          if (issueData[key].dueDate) {
+            let due = issueData[key].dueDate.substring(0, 10).split("-");
+            if (!labelDateSince) {
+              labelDateSince = new Date(due[0], due[1] - 1, due[2]);
+              labelworkSince = new Date(due[0], due[1] - 1, due[2]);
+            }
+            labelDateUntil = new Date(due[0], due[1] - 1, due[2]);
           }
-          labelDateUntil = new Date(due[0], due[1], due[2]);
+        });
+        // 現在日がラベルに入るようにする。
+        // ただし、最終日が過ぎていないことを条件とする
+        let targetDate = new Date();
+        let isDoingProject  = false;
+        if (labelDateUntil > targetDate) {
+
+          while (targetDate > labelDateSince) {
+            isDoingProject = true;
+            targetDate.setDate(targetDate.getDate() - LABEL_WIDTH);
+          }
+          labelDateSince = targetDate;
         }
-      });
-      labelDateUntil.setDate(labelDateUntil.getDate() + LABEL_WIDTH);
 
-      let differenceLime = [];
-      //LABEL_WIDTH毎にチケットデータを纏める
-      for (
-        let xDate = labelDateSince;
-        xDate < labelDateUntil;
-        xDate.setDate(xDate.getDate() + LABEL_WIDTH)
-      ) {
-        let hasfinishData = false;
-        Object.values(issueData).forEach(values => {
-          if (values.dueDate) {
-            let a = values.dueDate.substring(0, 10).split("-");
-            let targetDate = new Date(a[0], a[1], a[2]);
-            //課題の日付がX軸よりも小さい時
-            if (targetDate <= xDate) {
-              //予定データを加算
-              estimatedSize += values.estimatedHours;
-              //完了データを加算
-              if (values.status.name === "完了") {
-                finishSize += values.actualHours;
-                expectSize += values.actualHours;
+        labelDateUntil.setDate(labelDateUntil.getDate() + LABEL_WIDTH);
 
-                // 完了の時、予定よりどのぐらいの倍率で完了したかを計算する
-                expectComp =
-                  Math.round(
-                    ((values.actualHours / values.estimatedHours + expectComp) /
-                      2) *
+        //LABEL_WIDTH毎にチケットデータを纏める
+        for (
+          let xDate = labelDateSince;
+          xDate < labelDateUntil;
+          xDate.setDate(xDate.getDate() + LABEL_WIDTH)
+        ) {
+          let hasfinishData = false;
+          Object.values(issueData).forEach(values => {
+            if (values.dueDate) {
+              let a = values.dueDate.substring(0, 10).split("-");
+              let targetDate = new Date(a[0], a[1] - 1, a[2]);
+              //課題の日付がX軸よりも小さい時
+              if (targetDate <= xDate) {
+                //予定データを加算
+                estimatedSize += values.estimatedHours;
+                //完了データを加算
+                if (values.status.name === "完了") {
+                  finishSize += values.actualHours;
+                  expectSize += values.actualHours;
+
+                  // 完了の時、予定よりどのぐらいの倍率で完了したかを計算する
+                  expectComp =
+                    Math.round(
+                      ((values.actualHours / values.estimatedHours + expectComp) /
+                        2) *
                       100
-                  ) / 100;
-                if (expectComp > 1.5) {
-                  expectComp = 1.5;
-                } else if (expectComp != 0 && expectComp < 0.5) {
-                  expectComp = 0.5;
+                    ) / 100;
+                  if (expectComp > 1.5) {
+                    expectComp = 1.5;
+                  } else if (expectComp < 0.5) {
+                    expectComp = 0.5;
+                  }
+                } else {
+                  //予想データを加算
+                  expectSize += values.estimatedHours * expectComp;
                 }
-              } else {
-                //予想データを加算
-                expectSize += values.estimatedHours * expectComp;
-              }
 
-              hasfinishData =
-                hasfinishData || values.actualHours ? true : false;
+                hasfinishData = hasfinishData || values.actualHours;
 
-              //ラベルをベースに工数を累積していく
-              if (
-                labels.indexOf(xDate.getMonth() + "/" + xDate.getDate()) === -1
-              ) {
-                labels.push(xDate.getMonth() + "/" + xDate.getDate());
+                //ラベルをベースに工数を累積していく
+                if (
+                  labels.indexOf((xDate.getMonth() + 1) + "/" + xDate.getDate()) === -1
+                ) {
+                  labels.push((xDate.getMonth() + 1) + "/" + xDate.getDate());
+                }
               }
             }
+          });
+          estimatedData.push(Math.round(estimatedSize * 100) / 100);
+          finishedData.push(Math.round(finishSize * 100) / 100);
+          expectData.push(Math.round(expectSize * 100) / 100);
+
+          estimatedSize = 0;
+          finishSize = 0;
+          expectSize = 0;
+          expectComp = 0;
+        }
+
+        //工数の値を設定する
+        estimatedSize = estimatedData[estimatedData.length - 1];
+        finishSize = finishedData[finishedData.length - 1];
+
+        //未設定の分を取得する
+        Object.keys(issueData).forEach(function (key) {
+          if (!issueData[key].dueDate) {
+            // 未設定の時
+            unSetestimatedSize += issueData[key].estimatedHours;
+            unSetfinishSize += issueData[key].actualHours;
+            hasUnSetData = true;
           }
         });
 
-        estimatedData.push(Math.round(estimatedSize * 100) / 100);
-        if (hasfinishData) {
-          finishedData.push(Math.round(finishSize * 100) / 100);
+        // 日付が初期の物を作成する
+        labelworkSince.setDate(labelworkSince.getDate() - LABEL_WIDTH);
+        labels.unshift(
+          (labelworkSince.getMonth() + 1) + "/" + labelworkSince.getDate()
+        );
+        if(!isDoingProject){
+          estimatedData.unshift(0);
+          finishedData.unshift(0);
+          expectData.unshift(0);
         }
-        expectData.push(Math.round(expectSize * 100) / 100);
 
-        differenceLime.push(
-          Math.round(finishSize * 100) / 100 -
-            Math.round(estimatedSize * 100) / 100
+
+        return {
+          labels: labels,
+          estimatedData: estimatedData,
+          estimatedSize: estimatedSize,
+          finishedData: finishedData,
+          finishSize: finishSize,
+          unSetestimatedSize: unSetestimatedSize,
+          unSetfinishSize: unSetfinishSize,
+          hasUnSetData: hasUnSetData,
+          expectData: expectData,
+          expectSize: expectSize,
+          expectComp: expectComp
+        };
+      },
+      /**
+       * 安全、危険のラインを引く
+       * @param labels
+       * @param estimatedData
+       * @param finishedData
+       */
+      formatBarUpSupportData: function (labels, estimatedData, finishedData) {
+        let safetyLine = [];
+        let warningLine = [];
+        let maxLine = [];
+        this.$data.test = "フォーマットで変更した";
+        // 安全性を示す直線を作成する
+        let magnification = Math.round(
+          estimatedData[estimatedData.length - 1] / labels.length
         );
 
-        estimatedSize = 0;
-        finishSize = 0;
-        expectSize = 0;
-        expectComp = 0;
-      }
+        //安全性の曲線の初期値
+        //TODO 要調整
+        const BASE_NUM = 20; //estimatedData[estimatedData.length - 1] / 3;
+        const WARN_BASE_NUM = 20; ///estimatedData[estimatedData.length - 1] / 8;
 
-      //工数の値を設定する
-      estimatedSize = estimatedData[estimatedData.length - 1];
-      finishSize = finishedData[finishedData.length - 1];
+        //安全性と危険性のラインを作成する。
+        for (let i = 0; i < labels.length; i++) {
+          let safeNum = magnification * i - BASE_NUM;
 
-      //未設定の分を取得する
-      Object.keys(issueData).forEach(function(key) {
-        if (!issueData[key].dueDate) {
-          // 未設定の時
-          unSetestimatedSize += issueData[key].estimatedHours;
-          unSetfinishSize += issueData[key].actualHours;
-          hasUnSetData = true;
+          safetyLine.push(safeNum > 0 ? safeNum : 0);
+          warningLine.push(magnification * i + WARN_BASE_NUM);
         }
-      });
 
-      // 日付が初期の物を作成する
-      labelworkSince.setDate(labelworkSince.getDate() - LABEL_WIDTH);
-      labels.unshift(
-        labelworkSince.getMonth() + "/" + labelworkSince.getDate()
-      );
-      estimatedData.unshift(0);
-      finishedData.unshift(0);
-      expectData.unshift(0);
+        //危険性のfillを出すために、上部にラインを作成する
+        let maxNum =
+          estimatedData[estimatedData.length - 1] >
+          finishedData[finishedData.length - 1]
+            ? estimatedData[estimatedData.length - 1]
+            : finishedData[finishedData.length - 1];
 
-      return {
-        labels: labels,
-        estimatedData: estimatedData,
-        estimatedSize: estimatedSize,
-        finishedData: finishedData,
-        finishSize: finishSize,
-        unSetestimatedSize: unSetestimatedSize,
-        unSetfinishSize: unSetfinishSize,
-        hasUnSetData: hasUnSetData,
-        expectData: expectData,
-        expectSize: expectSize,
-        expectComp: expectComp
-      };
-    },
-    /**
-     * 安全、危険のラインを引く
-     * @param labels
-     * @param estimatedData
-     * @param finishedData
-     */
-    formatBarUpSupportData: function(labels, estimatedData, finishedData) {
-      let safetyLine = [];
-      let warningLine = [];
-      let maxLine = [];
-      this.$data.test = "フォーマットで変更した";
-      // 安全性を示す直線を作成する
-      let magnification = Math.round(
-        estimatedData[estimatedData.length - 1] / labels.length
-      );
+        //TODO 要調整
+        maxNum = Math.floor(maxNum / 20) * 20 + 20;
+        maxNum =
+          warningLine[warningLine.length - 1] > maxNum
+            ? warningLine[warningLine.length - 1]
+            : maxNum;
+        labels.forEach(() => {
+          maxLine.push(maxNum);
+        });
 
-      //安全性の曲線の初期値
-      //TODO 要調整
-      const BASE_NUM = 20; //estimatedData[estimatedData.length - 1] / 3;
-      const WARN_BASE_NUM = 20; ///estimatedData[estimatedData.length - 1] / 8;
+        return {
+          safetyLine: safetyLine,
+          warningLine: warningLine,
+          maxLine: maxLine
+        };
+      },
+      /**
+       * バーアップ用のデータに整形する。
+       * 予定、実績、予想、安全、危険、ラベルを返す
+       *
+       * @param issueData APIで取得した課題データ
+       */
+      formatBarUp: function (issueData) {
+        //メインデータを取得する
+        let mainData = this.formatBarUpMainData(issueData);
 
-      //安全性と危険性のラインを作成する。
-      for (let i = 0; i < labels.length; i++) {
-        let safeNum = magnification * i - BASE_NUM;
+        let labels = mainData.labels;
 
-        safetyLine.push(safeNum > 0 ? safeNum : 0);
-        warningLine.push(magnification * i + WARN_BASE_NUM);
-      }
+        let estimatedData = mainData.estimatedData;
+        let estimatedSize = mainData.estimatedSize;
 
-      //危険性のfillを出すために、上部にラインを作成する
-      let maxNum =
-        estimatedData[estimatedData.length - 1] >
-        finishedData[finishedData.length - 1]
-          ? estimatedData[estimatedData.length - 1]
-          : finishedData[finishedData.length - 1];
+        let finishSize = mainData.finishSize;
+        let finishedData = mainData.finishedData;
 
-      //TODO 要調整
-      maxNum = Math.floor(maxNum / 20) * 20 + 20;
-      maxNum =
-        warningLine[warningLine.length - 1] > maxNum
-          ? warningLine[warningLine.length - 1]
-          : maxNum;
-      labels.forEach(() => {
-        maxLine.push(maxNum);
-      });
+        let unSetestimatedSize = mainData.unSetestimatedSize;
+        let unSetfinishSize = mainData.unSetfinishSize;
+        let hasUnSetData = mainData.hasUnSetData;
 
-      return {
-        safetyLine: safetyLine,
-        warningLine: warningLine,
-        maxLine: maxLine
-      };
-    },
-    /**
-     * バーアップ用のデータに整形する。
-     * 予定、実績、予想、安全、危険、ラベルを返す
-     *
-     * @param issueData APIで取得した課題データ
-     */
-    formatBarUp: function(issueData) {
-      //メインデータを取得する
-      let mainData = this.formatBarUpMainData(issueData);
+        let expectData = mainData.expectData;
+        let expectSize = mainData.expectSize;
+        let expectComp = mainData.expectComp;
 
-      let labels = mainData.labels;
+        // 未設定がある場合
+        if (hasUnSetData) {
+          labels.push("未設定");
+          estimatedData.push(
+            Math.round(unSetestimatedSize + estimatedSize * 100) / 100
+          );
+          finishedData.push(Math.round(unSetfinishSize + finishSize * 100) / 100);
+        }
 
-      let estimatedData = mainData.estimatedData;
-      let estimatedSize = mainData.estimatedSize;
-
-      let finishSize = mainData.finishSize;
-      let finishedData = mainData.finishedData;
-
-      let unSetestimatedSize = mainData.unSetestimatedSize;
-      let unSetfinishSize = mainData.unSetfinishSize;
-      let hasUnSetData = mainData.hasUnSetData;
-
-      let expectData = mainData.expectData;
-      let expectSize = mainData.expectSize;
-      let expectComp = mainData.expectComp;
-
-      // 未設定がある場合
-      if (hasUnSetData) {
-        labels.push("未設定");
-        estimatedData.push(
-          Math.round(unSetestimatedSize + estimatedSize * 100) / 100
+        //supportデータを取得
+        let supportData = this.formatBarUpSupportData(
+          labels,
+          estimatedData,
+          finishedData
         );
-        finishedData.push(Math.round(unSetfinishSize + finishSize * 100) / 100);
+
+        let safetyLine = supportData.safetyLine;
+        let warningLine = supportData.warningLine;
+        let maxLine = supportData.maxLine;
+
+        return {
+          labels: labels,
+          estimatedData: estimatedData,
+          finishedData: finishedData,
+          safetyLine: safetyLine,
+          warningLine: warningLine,
+          maxLine: maxLine,
+          expectData: expectData
+        };
       }
-
-      //supportデータを取得
-      let supportData = this.formatBarUpSupportData(
-        labels,
-        estimatedData,
-        finishedData
-      );
-
-      let safetyLine = supportData.safetyLine;
-      let warningLine = supportData.warningLine;
-      let maxLine = supportData.maxLine;
-
-      return {
-        labels: labels,
-        estimatedData: estimatedData,
-        finishedData: finishedData,
-        safetyLine: safetyLine,
-        warningLine: warningLine,
-        maxLine: maxLine,
-        expectData: expectData
-      };
     }
-  }
-};
+  };
 </script>
