@@ -58,6 +58,12 @@
           <el-form-item label="アクセストークン" :label-width="formLabelWidth">
             <el-input v-model="form.token" autocomplete="off"></el-input>
           </el-form-item>
+          <el-form-item label="一日の稼働時間（Hour）" :label-width="formLabelWidth">
+            <el-input v-model="form.operatingTime" autocomplete="off"></el-input>
+          </el-form-item>
+          <el-form-item label="一人あたりの時給(万円)" :label-width="formLabelWidth">
+            <el-input v-model="form.hourlySalary" autocomplete="off"></el-input>
+          </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialogFormVisible = false">キャンセル</el-button>
@@ -136,6 +142,9 @@ export default {
     saveAccessKeys: function() {
       localStorage.spaceName = this.$data.form["spaceName"];
       localStorage.token = this.$data.form["token"];
+      localStorage.operatingTime = this.$data.form["operatingTime"]?this.$data.form["operatingTime"]:8;
+      localStorage.hourlySalary = this.$data.form["hourlySalary"]?this.$data.form["hourlySalary"]:8;
+
       this.readProjectNames();
     },
 
@@ -307,7 +316,9 @@ export default {
       dialogFormVisible: false,
       form: {
         spaceName: "",
-        token: ""
+        token: "",
+        operatingTime: "",
+        hourlySalary: ""
       },
       formLabelWidth: "200px",
       issueCount: 0
