@@ -47,86 +47,89 @@
           }
         });
 
-        if (!labelDateSince && !labelDateSince) {
-          return 0;
-        }
-        // 現在日がラベルに入るようにする。
-        // ただし、最終日が過ぎていないことを条件とする
-        let targetDate = new Date();
+        //ラベルデータがないと処理が行えないので、スキップするようにする。
+        // ラベルなしは未設定として登録したいので、このようにする
+        let hasLabelData = labelDateSince && labelDateUntil;
+
+        // 現在日付がマイルストーン内にあるかどうかを判定
         let isDoingProject = false;
-        if (labelDateUntil > targetDate) {
+        if (hasLabelData) {
+          // 現在日がラベルに入るようにする。
+          // ただし、最終日が過ぎていないことを条件とする
+          let targetDate = new Date();
+          if (labelDateUntil > targetDate) {
 
-          while (targetDate > labelDateSince) {
-            isDoingProject = true;
-            targetDate.setDate(targetDate.getDate() - LABEL_WIDTH);
+            while (targetDate > labelDateSince) {
+              isDoingProject = true;
+              targetDate.setDate(targetDate.getDate() - LABEL_WIDTH);
+            }
+            labelDateSince = targetDate;
           }
-          labelDateSince = targetDate;
-        }
 
-        labelDateUntil.setDate(labelDateUntil.getDate() + LABEL_WIDTH);
+          labelDateUntil.setDate(labelDateUntil.getDate() + LABEL_WIDTH);
 
-        //LABEL_WIDTH毎にチケットデータを纏める
-        for (
-          let xDate = labelDateSince;
-          xDate < labelDateUntil;
-          xDate.setDate(xDate.getDate() + LABEL_WIDTH)
-        ) {
-          let hasfinishData = false;
-          Object.values(issueData).forEach(values => {
-            if (values.dueDate) {
-              let a = values.dueDate.substring(0, 10).split("-");
-              let targetDate = new Date(a[0], a[1] - 1, a[2]);
-              //課題の日付がX軸よりも小さい時
-              if (targetDate <= xDate) {
-                //予定データを加算
-                estimatedSize += values.estimatedHours;
-                //完了データを加算
-                if (values.status.name === "完了") {
-                  finishSize += values.actualHours;
-                  expectSize += values.actualHours;
+          //LABEL_WIDTH毎にチケットデータを纏める
+          for (
+            let xDate = labelDateSince;
+            xDate < labelDateUntil;
+            xDate.setDate(xDate.getDate() + LABEL_WIDTH)
+          ) {
+            let hasfinishData = false;
+            Object.values(issueData).forEach(values => {
+              if (values.dueDate) {
+                let a = values.dueDate.substring(0, 10).split("-");
+                let targetDate = new Date(a[0], a[1] - 1, a[2]);
+                //課題の日付がX軸よりも小さい時
+                if (targetDate <= xDate) {
+                  //予定データを加算
+                  estimatedSize += values.estimatedHours;
+                  //完了データを加算
+                  if (values.status.name === "完了") {
+                    finishSize += values.actualHours;
+                    expectSize += values.actualHours;
 
-                  // 完了の時、予定よりどのぐらいの倍率で完了したかを計算する
-                  expectComp =
-                    Math.round(
-                      ((values.actualHours / values.estimatedHours + expectComp) /
-                        2) *
-                      100
-                    ) / 100;
-                  if (expectComp > 1.5) {
-                    expectComp = 1.5;
-                  } else if (expectComp < 0.5) {
-                    expectComp = 0.5;
+                    // 完了の時、予定よりどのぐらいの倍率で完了したかを計算する
+                    expectComp =
+                      Math.round(
+                        ((values.actualHours / values.estimatedHours + expectComp) /
+                          2) *
+                        100
+                      ) / 100;
+                    if (expectComp > 1.5) {
+                      expectComp = 1.5;
+                    } else if (expectComp < 0.5) {
+                      expectComp = 0.5;
+                    }
+                  } else {
+                    //予想データを加算
+                    expectSize += values.estimatedHours * expectComp;
                   }
-                } else {
-                  //予想データを加算
-                  expectSize += values.estimatedHours * expectComp;
-                }
 
-                hasfinishData = hasfinishData || values.actualHours;
+                  hasfinishData = hasfinishData || values.actualHours;
 
-                //ラベルをベースに工数を累積していく
-                if (
-                  labels.indexOf((xDate.getMonth() + 1) + "/" + xDate.getDate()) === -1
-                ) {
-                  labels.push((xDate.getMonth() + 1) + "/" + xDate.getDate());
+                  //ラベルをベースに工数を累積していく
+                  if (
+                    labels.indexOf((xDate.getMonth() + 1) + "/" + xDate.getDate()) === -1
+                  ) {
+                    labels.push((xDate.getMonth() + 1) + "/" + xDate.getDate());
+                  }
                 }
               }
-            }
-          });
-          estimatedData.push(Math.round(estimatedSize * 100) / 100);
-          finishedData.push(Math.round(finishSize * 100) / 100);
-          expectData.push(Math.round(expectSize * 100) / 100);
+            });
+            estimatedData.push(Math.round(estimatedSize * 100) / 100);
+            finishedData.push(Math.round(finishSize * 100) / 100);
+            expectData.push(Math.round(expectSize * 100) / 100);
 
-          estimatedSize = 0;
-          finishSize = 0;
-          expectSize = 0;
-          expectComp = 0;
+            estimatedSize = 0;
+            finishSize = 0;
+            expectSize = 0;
+            expectComp = 0;
+          }
+
+          //工数の値を設定する
+          estimatedSize = estimatedData[estimatedData.length - 1];
+          finishSize = finishedData[finishedData.length - 1];
         }
-
-        //工数の値を設定する
-        estimatedSize = estimatedData[estimatedData.length - 1];
-        finishSize = finishedData[finishedData.length - 1];
-
         //未設定の分を取得する
         Object.keys(issueData).forEach(function (key) {
           if (!issueData[key].dueDate) {
@@ -137,17 +140,18 @@
           }
         });
 
-        // 日付が初期の物を作成する
-        labelworkSince.setDate(labelworkSince.getDate() - LABEL_WIDTH);
-        labels.unshift(
-          (labelworkSince.getMonth() + 1) + "/" + labelworkSince.getDate()
-        );
-        if (!isDoingProject) {
-          estimatedData.unshift(0);
-          finishedData.unshift(0);
-          expectData.unshift(0);
+        if (hasLabelData) {
+          // 日付が初期の物を作成する
+          labelworkSince.setDate(labelworkSince.getDate() - LABEL_WIDTH);
+          labels.unshift(
+            (labelworkSince.getMonth() + 1) + "/" + labelworkSince.getDate()
+          );
+          if (!isDoingProject) {
+            estimatedData.unshift(0);
+            finishedData.unshift(0);
+            expectData.unshift(0);
+          }
         }
-
 
         return {
           labels: labels,
