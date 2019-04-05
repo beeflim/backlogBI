@@ -1,13 +1,41 @@
 <template>
+
   <section class="line-container">
-    <div>
+    <div style="width: 60vw">
       <h1
         class="line-title"
-      >[{{ $store.state.chartName }}] {{ $store.state.projectName }} - {{ $store.state.milestoneName }}</h1>
+      >[{{ $store.state.chartName }}] {{ $store.state.projectName }} <br> {{ $store.state.milestoneName }}</h1>
       <div class="line-chart">
         <LineChart :data="writeLineChart()" :options="lineOptions()"></LineChart>
       </div>
+      <br>
+      <div style="text-align: center;width: 80%; margin: 0 auto;">
+        <el-table
+          :data="tableData"
+          style="width: 100%">
+          <el-table-column
+            prop="title"
+            label=""
+            width="180">
+          </el-table-column>
+          <el-table-column
+            prop="estimatedMoney"
+            label="予定金額"
+            width="180">
+          </el-table-column>
+          <el-table-column
+            prop="finishedMoney"
+            label="完了金額"
+            width="180">
+          </el-table-column>
+          <el-table-column
+            prop="difference"
+            label="差額">
+          </el-table-column>
+        </el-table>
+      </div>
     </div>
+
   </section>
 </template>
 
@@ -39,7 +67,8 @@
         safetyLine: this.p_safetyLine,
         warningLine: this.p_warningLine,
         maxLine: this.p_maxLine,
-        expectData: this.p_expectData
+        expectData: this.p_expectData,
+        tableData: []
       };
     },
     async mounted() {
@@ -54,7 +83,10 @@
         this.$data.warningLine = formatedData.warningLine;
         this.$data.maxLine = formatedData.maxLine;
         this.$data.expectData = formatedData.expectData;
-      }else{
+
+        this.$data.tableData = this.createTableData(formatedData)
+
+      } else {
         this.$message({
           message:
             "データを出力するには、チケットに開始日、終了日、予定工数、完了工数を入力してください。。",
@@ -137,10 +169,48 @@
             }
           ]
         };
-      }
-      ,
+      },
       lineOptions: function () {
         return {};
+      },
+      createTableData: function (formatedData) {
+        let nowDate = new Date();
+        let indexNum = formatedData.labels.indexOf((nowDate.getMonth() + 1) + '/' + nowDate.getDate());
+
+        let expectMoney = formatedData.expectData[formatedData.expectData.length - 1] * localStorage.hourlySalary * 10000;
+        let fullEstimatedMoney = formatedData.estimatedData[formatedData.estimatedData.length - 1] * localStorage.hourlySalary * 10000;
+        let estimatedMoney = 0;
+        let finishedMoney = 0;
+        let title = '';
+
+        if (indexNum < 0) {
+          title = '予定金額';
+          estimatedMoney = formatedData.estimatedData[formatedData.estimatedData.length - 1] * localStorage.hourlySalary * 10000;
+          finishedMoney = formatedData.finishedData[formatedData.finishedData.length - 1] * localStorage.hourlySalary * 10000;
+
+        } else {
+          title = `予定金額 (${(nowDate.getMonth() + 1) + '/' + nowDate.getDate()})時点`;
+          estimatedMoney = formatedData.estimatedData[indexNum] * localStorage.hourlySalary * 10000;
+          finishedMoney = formatedData.finishedData[indexNum] * localStorage.hourlySalary * 10000;
+        }
+
+        return [{
+          title: title,
+          estimatedMoney: estimatedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
+          finishedMoney: finishedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
+          difference: (estimatedMoney - finishedMoney).toLocaleString('ja-JP', {
+            "style": "currency",
+            "currency": "JPY"
+          }),
+        }, {
+          title: '予想金額',
+          estimatedMoney: fullEstimatedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
+          finishedMoney: expectMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
+          difference: (fullEstimatedMoney - expectMoney).toLocaleString('ja-JP', {
+            "style": "currency",
+            "currency": "JPY"
+          }),
+        }];
       }
     }
   }
@@ -160,7 +230,7 @@
     "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* 1 */
     display: block;
     font-weight: bold;
-    font-size: 30px;
+    font-size: 24px;
     color: #35495e;
     letter-spacing: 1px;
   }
