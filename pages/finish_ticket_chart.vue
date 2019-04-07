@@ -68,11 +68,12 @@
         this.finishedData.push(Math.round(finishedSize * 100) / 100);
       },
       writeBarChart: function () {
+        let nowDate = new Date();
         return {
           labels: this.$data.labels,
           datasets: [
             {
-              label: '予定',
+              label: `予定(${nowDate.getMonth()+1}/${nowDate.getDate()})`,
               borderColor: 'rgba(182,182,182,1)',
               backgroundColor: 'rgba(182,182,182,0.4)',
               data: this.$data.estimatedData
