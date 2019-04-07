@@ -314,7 +314,11 @@ export default {
       chartOption: [
         {
           value: "progress_chart",
-          label: "進捗表"
+          label: "進捗表(全体)"
+        },
+        {
+          value: "progress_chart_user",
+          label: "進捗表(個別)"
         },
         {
           value: "finish_ticket_chart",
