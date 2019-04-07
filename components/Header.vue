@@ -34,7 +34,7 @@
     </el-col>
     <el-col :span="5">
       <div class="header-col header-col__select">
-        <el-select v-model="chartId" @change="saveChartId" placeholder="チャートを選択してください">
+        <el-select :disabled="chartCanUse" v-model="chartId" @change="saveChartId" placeholder="チャートを選択してください">
           <el-option
             v-for="item in chartOption"
             :key="item.value"
@@ -58,10 +58,10 @@
           <el-form-item label="アクセストークン（必須）" :label-width="formLabelWidth">
             <el-input v-model="form.token" autocomplete="off"></el-input>
           </el-form-item>
-          <el-form-item label="一日の稼働時間（Hour）:初期位 8" :label-width="formLabelWidth">
+          <el-form-item label="一日の稼働時間（Hour）:初期値:8" :label-width="formLabelWidth">
             <el-input v-model="form.operatingTime" autocomplete="off"></el-input>
           </el-form-item>
-          <el-form-item label="一人あたりの時給(万円)：初期値 0.6" :label-width="formLabelWidth">
+          <el-form-item label="一人あたりの時給(万円)：初期値:0.6" :label-width="formLabelWidth">
             <el-input v-model="form.hourlySalary" autocomplete="off"></el-input>
           </el-form-item>
         </el-form>
@@ -132,6 +132,11 @@
 <script>
 export default {
   async mounted() {
+    this.$data.form["spaceName"] = localStorage.spaceName;
+    this.$data.form["token"] = localStorage.token;
+    this.$data.form["operatingTime"] = localStorage.operatingTime?localStorage.operatingTime:8;
+    this.$data.form["hourlySalary"] = localStorage.hourlySalary?localStorage.hourlySalary:0.6;
+
     this.readProjectNames();
   },
   methods: {
@@ -172,6 +177,7 @@ export default {
       );
       this.$data.milestoneId = "";
       this.$data.chartId = "";
+      this.chartCanUse = true;
       this.$router.push("/");
     },
     /**
@@ -236,6 +242,7 @@ export default {
     getIssueCount: async function() {
       this.$router.push("/");
       this.$data.chartId = "";
+      this.chartCanUse = true;
       let url =
         `https://${localStorage.spaceName}.backlog.jp` +
         "/api/v2/issues/count" +
@@ -255,6 +262,7 @@ export default {
           });
           console.log(e);
         });
+      this.chartCanUse = false;
     },
     /**
      * 選択されているセレクトボックスの名前を取得する
@@ -298,6 +306,7 @@ export default {
   },
   data() {
     return {
+      chartCanUse:true,
       projectOption: [],
       projectId: "",
       milestoneOption: [],

@@ -53,11 +53,13 @@
         let finishedSize = 0;
 
         Object.values(issueData).forEach(issue => {
-          //現在日までの予定工数の合計
-          let due = issue.dueDate.substring(0, 10).split('-');
-          let dueDate = new Date(due[0], due[1] - 1, due[2]);
-          if (dueDate <= nowDate) {
-            estimatedSize += issue.estimatedHours;
+          if (issue.dueDate) {
+            //現在日までの予定工数の合計
+            let due = issue.dueDate.substring(0, 10).split('-');
+            let dueDate = new Date(due[0], due[1] - 1, due[2]);
+            if (dueDate <= nowDate) {
+              estimatedSize += issue.estimatedHours;
+            }
           }
           //現在の完了工数
           if (issue.status.name === "完了") {
@@ -73,7 +75,7 @@
           labels: this.$data.labels,
           datasets: [
             {
-              label: `予定(${nowDate.getMonth()+1}/${nowDate.getDate()})`,
+              label: `予定(${nowDate.getMonth() + 1}/${nowDate.getDate()})`,
               borderColor: 'rgba(182,182,182,1)',
               backgroundColor: 'rgba(182,182,182,0.4)',
               data: this.$data.estimatedData
