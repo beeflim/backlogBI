@@ -58,10 +58,10 @@
           <el-form-item label="アクセストークン（必須）" :label-width="formLabelWidth">
             <el-input v-model="form.token" autocomplete="off"></el-input>
           </el-form-item>
-          <el-form-item label="一日の稼働時間（Hour）:初期位 8" :label-width="formLabelWidth">
+          <el-form-item label="一日の稼働時間（Hour）:初期値:8" :label-width="formLabelWidth">
             <el-input v-model="form.operatingTime" autocomplete="off"></el-input>
           </el-form-item>
-          <el-form-item label="一人あたりの時給(万円)：初期値 0.6" :label-width="formLabelWidth">
+          <el-form-item label="一人あたりの時給(万円)：初期値:0.6" :label-width="formLabelWidth">
             <el-input v-model="form.hourlySalary" autocomplete="off"></el-input>
           </el-form-item>
         </el-form>
@@ -132,6 +132,11 @@
 <script>
 export default {
   async mounted() {
+    this.$data.form["spaceName"] = localStorage.spaceName;
+    this.$data.form["token"] = localStorage.token;
+    this.$data.form["operatingTime"] = localStorage.operatingTime?localStorage.operatingTime:8;
+    this.$data.form["hourlySalary"] = localStorage.hourlySalary?localStorage.hourlySalary:0.6;
+
     this.readProjectNames();
   },
   methods: {
