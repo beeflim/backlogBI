@@ -5,8 +5,6 @@
     extends: Line,
     props: ['data', 'options'],
     mounted: function(){
-      console.log(this.data);
-      console.log(this.option);
       this.renderChart(this.data, this.options)
     },
     watch : {

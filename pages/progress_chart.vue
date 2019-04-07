@@ -4,7 +4,8 @@
     <div style="width: 60vw">
       <h1
         class="line-title"
-      >[{{ $store.state.chartName }}] {{ $store.state.projectName }} <br> {{ $store.state.milestoneName }}</h1>
+      >[{{ $store.state.chartName }}] {{ $store.state.projectName }} <br> {{ $store.state.milestoneName }}
+      </h1>
       <div class="line-chart">
         <LineChart :data="writeLineChart()" :options="lineOptions()"></LineChart>
       </div>
