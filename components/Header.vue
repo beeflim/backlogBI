@@ -34,7 +34,7 @@
     </el-col>
     <el-col :span="5">
       <div class="header-col header-col__select">
-        <el-select v-model="chartId" @change="saveChartId" placeholder="チャートを選択してください">
+        <el-select :disabled="chartCanUse" v-model="chartId" @change="saveChartId" placeholder="チャートを選択してください">
           <el-option
             v-for="item in chartOption"
             :key="item.value"
@@ -177,6 +177,7 @@ export default {
       );
       this.$data.milestoneId = "";
       this.$data.chartId = "";
+      this.chartCanUse = true;
       this.$router.push("/");
     },
     /**
@@ -241,6 +242,7 @@ export default {
     getIssueCount: async function() {
       this.$router.push("/");
       this.$data.chartId = "";
+      this.chartCanUse = true;
       let url =
         `https://${localStorage.spaceName}.backlog.jp` +
         "/api/v2/issues/count" +
@@ -260,6 +262,7 @@ export default {
           });
           console.log(e);
         });
+      this.chartCanUse = false;
     },
     /**
      * 選択されているセレクトボックスの名前を取得する
@@ -303,6 +306,7 @@ export default {
   },
   data() {
     return {
+      chartCanUse:true,
       projectOption: [],
       projectId: "",
       milestoneOption: [],
