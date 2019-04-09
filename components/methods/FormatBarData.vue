@@ -308,6 +308,50 @@
           estimatedSize: Math.round(estimatedSize * 100) / 100,
           finishedSize: Math.round(finishedSize * 100) / 100
         };
+      },
+      /**
+       * 金額表を作成する
+       * @param formatedData データ
+       * @returns {*[]}
+       */
+      createTableData: function (formatedData) {
+        let nowDate = new Date();
+        let indexNum = formatedData.labels.indexOf((nowDate.getMonth() + 1) + '/' + nowDate.getDate());
+
+        let expectMoney = formatedData.expectData[formatedData.expectData.length - 1] * localStorage.hourlySalary * 10000;
+        let fullEstimatedMoney = formatedData.estimatedData[formatedData.estimatedData.length - 1] * localStorage.hourlySalary * 10000;
+        let estimatedMoney = 0;
+        let finishedMoney = 0;
+        let title = '';
+
+        if (indexNum < 0) {
+          title = '予定金額';
+          estimatedMoney = formatedData.estimatedData[formatedData.estimatedData.length - 1] * localStorage.hourlySalary * 10000;
+          finishedMoney = formatedData.finishedData[formatedData.finishedData.length - 1] * localStorage.hourlySalary * 10000;
+
+        } else {
+          title = `予定金額 (${(nowDate.getMonth() + 1) + '/' + nowDate.getDate()})時点`;
+          estimatedMoney = formatedData.estimatedData[indexNum] * localStorage.hourlySalary * 10000;
+          finishedMoney = formatedData.finishedData[indexNum] * localStorage.hourlySalary * 10000;
+        }
+
+        return [{
+          title: title,
+          estimatedMoney: estimatedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
+          finishedMoney: finishedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
+          difference: (estimatedMoney - finishedMoney).toLocaleString('ja-JP', {
+            "style": "currency",
+            "currency": "JPY"
+          }),
+        }, {
+          title: '予想金額',
+          estimatedMoney: fullEstimatedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
+          finishedMoney: expectMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
+          difference: (fullEstimatedMoney - expectMoney).toLocaleString('ja-JP', {
+            "style": "currency",
+            "currency": "JPY"
+          }),
+        }];
       }
     }
   };
