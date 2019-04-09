@@ -10,7 +10,7 @@
       <div v-for="lineData in user" :key="lineData.name">
         <div class="line-chart">
           <h2>{{lineData.name}}</h2>
-          <LineChart :data="writeLineChart(lineData)" :options="lineOptions()"></LineChart>
+          <BarChart :data="writeLineChart(lineData)" :options="lineOptions()"></BarChart>
           <br>
           <div style="text-align: center; margin: 0 auto;">
             <el-table
@@ -45,7 +45,7 @@
 </template>
 
 <script>
-  import LineChart from "@/components/chart/LineChart.vue";
+  import BarChart from "@/components/chart/BarChart.vue";
   import Vue from "vue";
   import ReadIssueData from "@/components/methods/ReadIssueData.vue";
   import FormatBarData from "@/components/methods/FormatBarData.vue";
@@ -54,7 +54,7 @@
   export default {
     mixins: [ReadIssueData, FormatBarData, ReadUserData],
     components: {
-      LineChart
+      BarChart
     },
     props: {
       p_labels: [],
@@ -80,6 +80,18 @@
           for (let user of userData) {
             let issueData = await this.getAllIssueData(user.id);
             let formatedData = this.formatBarUp(issueData);
+            let formatedBarData = this.formatBouGraph(issueData);
+
+            let nowData = new Date();
+
+            let todayIndex = formatedData.labels.indexOf(`${nowData.getMonth() + 1}/${nowData.getDate()}`);
+            let barEstimatedData = [];
+            let barFinishData = [];
+
+            for (let i = 0; i < formatedData.labels.length; i++) {
+              barEstimatedData.push((i === todayIndex) ? formatedBarData.estimatedSize : 0);
+              barFinishData.push((i === todayIndex) ? formatedBarData.finishedSize : 0);
+            }
 
             if (formatedData !== 0) {
               if (formatedData.labels.length !== 0) {
@@ -94,6 +106,8 @@
                       warningLine: formatedData.warningLine,
                       maxLine: formatedData.maxLine,
                       expectData: formatedData.expectData,
+                      barEstimatedData: barEstimatedData,
+                      barFinishData: barFinishData,
                       tableData: this.createTableData(formatedData)
                     }
                   }
@@ -115,17 +129,6 @@
           labels: lineData.data.labels,
           datasets: [
             {
-              label: "完了 工数(時)",
-              borderColor: "rgba(86,167,100,1)",
-              backgroundColor: "rgba(86,167,100,0.1)",
-              borderWidth: "3",
-              fill: false,
-              pointStyle: "dotted",
-              pointBackgroundColor: "rgba(186,267,200,1)",
-              pointBorderColor: "rgba(86,167,100,1)",
-              data: lineData.data.finishedData
-            },
-            {
               label: "予定 工数(時)",
               borderColor: "rgba(182,182,182,1)",
               backgroundColor: "rgba(182,182,182,0.1)",
@@ -134,48 +137,34 @@
               pointStyle: "dotted",
               pointBackgroundColor: "rgba(182,182,182,1)",
               pointBorderColor: "rgba(182,182,182,1)",
-              data: lineData.data.estimatedData
+              data: lineData.data.estimatedData,
+              type:"line"
             },
             {
-              label: "予想 工数(時)",
-              borderColor: "rgba(255,82,139,1)",
-              backgroundColor: "rgba(255,82,139,0.1)",
-              borderWidth: "3",
-              pointStyle: "dotted",
-              fill: false,
-              pointBackgroundColor: "rgba(255,82,139,1)",
-              pointBorderColor: "rgba(255,82,139,1)",
-              data: lineData.data.expectData
-            },
-            {
-              label: "安全性",
+              label: "完了 工数(時)",
               borderColor: "rgba(86,167,100,1)",
               backgroundColor: "rgba(86,167,100,0.1)",
-              borderWidth: "1",
-              pointStyle: "line",
-              fill: "origin",
-              pointBorderWidth: 0,
-              data: lineData.data.safetyLine
-            },
-            {
-              label: "危険性",
-              borderColor: "rgba(204,82,139,1)",
-              backgroundColor: "rgba(204,82,139,0.1)",
-              borderWidth: "1",
-              pointStyle: "line",
-              fill: 5,
-              pointBorderWidth: 0,
-              data: lineData.data.warningLine
-            },
-            {
-              label: "",
-              borderColor: "rgba(204,82,139,1)",
-              backgroundColor: "rgba(204,82,139,0.1)",
-              borderWidth: "0",
-              pointStyle: "line",
-              pointBorderWidth: 0,
+              borderWidth: "3",
               fill: false,
-              data: lineData.data.maxLine
+              pointStyle: "dotted",
+              pointBackgroundColor: "rgba(186,267,200,1)",
+              pointBorderColor: "rgba(86,167,100,1)",
+              data: lineData.data.finishedData,
+              type:"line"
+            },
+            {
+              label: "予定 工数(時)",
+              borderColor: "rgba(182,182,182,1)",
+              backgroundColor: "rgba(182,182,182,0.1)",
+              borderWidth: "3",
+              data: lineData.data.barEstimatedData
+            },
+            {
+              label: "完了 工数(時)",
+              borderColor: "rgba(86,167,100,1)",
+              backgroundColor: "rgba(86,167,100,0.1)",
+              borderWidth: "3",
+              data: lineData.data.barFinishData
             }
           ]
         };

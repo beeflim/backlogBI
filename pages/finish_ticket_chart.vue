@@ -15,9 +15,10 @@
   import ReadUserData from "@/components/methods/ReadUserData.vue";
   import BarChart from "@/components/chart/BarChart.vue";
   import ReadIssueData from "@/components/methods/ReadIssueData.vue";
+  import FormatBarData from "@/components/methods/FormatBarData.vue";
 
   export default {
-    mixins: [ReadUserData, ReadIssueData],
+    mixins: [ReadUserData, ReadIssueData,FormatBarData],
     components: {
       BarChart
     },
@@ -32,7 +33,10 @@
       (async () => {
         for (let user of userData) {
           let data = await this.getAllIssueData(user.id);
-          this.format(data);
+          let fData = this.formatBouGraph(data);
+          this.estimatedData.push(Math.round(fData.estimatedSize * 100) / 100);
+          this.finishedData.push(Math.round(fData.finishedSize * 100) / 100);
+
         }
       })();
 
@@ -45,30 +49,6 @@
       }
     },
     methods: {
-      format: function (issueData) {
-
-        let nowDate = new Date();
-
-        let estimatedSize = 0;
-        let finishedSize = 0;
-
-        Object.values(issueData).forEach(issue => {
-          if (issue.dueDate) {
-            //現在日までの予定工数の合計
-            let due = issue.dueDate.substring(0, 10).split('-');
-            let dueDate = new Date(due[0], due[1] - 1, due[2]);
-            if (dueDate <= nowDate) {
-              estimatedSize += issue.estimatedHours;
-            }
-          }
-          //現在の完了工数
-          if (issue.status.name === "完了") {
-            finishedSize += issue.actualHours;
-          }
-        });
-        this.estimatedData.push(Math.round(estimatedSize * 100) / 100);
-        this.finishedData.push(Math.round(finishedSize * 100) / 100);
-      },
       writeBarChart: function () {
         let nowDate = new Date();
         return {

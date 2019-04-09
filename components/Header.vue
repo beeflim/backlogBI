@@ -323,6 +323,11 @@ export default {
         {
           value: "finish_ticket_chart",
           label: "チケット消化状況"
+        },
+
+        {
+          value: "combo_chart_user",
+          label: "複合評価（個別）"
         }
       ],
       chartId: "",
