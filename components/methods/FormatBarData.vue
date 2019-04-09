@@ -288,6 +288,10 @@
 
         let estimatedSize = 0;
         let finishedSize = 0;
+        let finishedFutureSize = 0;
+        let estimatedTicketSize = 0;
+        let finishedTicketSize = 0;
+        let finishedTicketFuterSize = 0;
 
         Object.values(issueData).forEach(issue => {
           if (issue.dueDate) {
@@ -296,17 +300,29 @@
             let dueDate = new Date(due[0], due[1] - 1, due[2]);
             if (dueDate <= nowDate) {
               estimatedSize += issue.estimatedHours;
+              estimatedTicketSize++;
+            }else{
+              if (issue.status.name === "完了") {
+                finishedFutureSize += issue.actualHours;
+                finishedTicketFuterSize++;
+              }
             }
           }
           //現在の完了工数
           if (issue.status.name === "完了") {
             finishedSize += issue.actualHours;
+            finishedTicketSize++;
           }
         });
 
         return {
           estimatedSize: Math.round(estimatedSize * 100) / 100,
-          finishedSize: Math.round(finishedSize * 100) / 100
+          finishedSize: Math.round(finishedSize * 100) / 100,
+          estimatedTicketSize,
+          finishedTicketSize,
+          finishedFutureSize,
+          finishedTicketFuterSize
+
         };
       },
       /**

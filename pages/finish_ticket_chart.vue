@@ -34,8 +34,9 @@
         for (let user of userData) {
           let data = await this.getAllIssueData(user.id);
           let fData = this.formatBouGraph(data);
-          this.estimatedData.push(Math.round(fData.estimatedSize * 100) / 100);
-          this.finishedData.push(Math.round(fData.finishedSize * 100) / 100);
+          this.estimatedData.push(fData.estimatedTicketSize);
+          this.finishedData.push(fData.finishedTicketFuterSize > 0 ? fData.finishedTicketSize -fData.finishedTicketFuterSize :fData.finishedTicketSize);
+          this.finishedFutureData.push(fData.finishedTicketFuterSize);
 
         }
       })();
@@ -45,7 +46,8 @@
       return {
         labels: [],
         estimatedData: [],
-        finishedData: []
+        finishedData: [],
+        finishedFutureData:[]
       }
     },
     methods: {
@@ -61,10 +63,16 @@
               data: this.$data.estimatedData
             },
             {
-              label: '実績',
+              label: `予定(${nowDate.getMonth() + 1}/${nowDate.getDate()})以前`,
               borderColor: 'rgba(86,167,100,1)',
               backgroundColor: 'rgba(86,167,100,0.4)',
               data: this.$data.finishedData
+            },
+            {
+              label: `予定(${nowDate.getMonth() + 1}/${nowDate.getDate()})以降`,
+              borderColor: 'rgb(33, 144, 255,1)',
+              backgroundColor: 'rgb(33, 144, 255,0.4)',
+              data: this.$data.finishedFutureData
             }
           ]
 
