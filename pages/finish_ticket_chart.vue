@@ -18,7 +18,7 @@
   import FormatBarData from "@/components/methods/FormatBarData.vue";
 
   export default {
-    mixins: [ReadUserData, ReadIssueData,FormatBarData],
+    mixins: [ReadUserData, ReadIssueData, FormatBarData],
     components: {
       BarChart
     },
@@ -35,7 +35,7 @@
           let data = await this.getAllIssueData(user.id);
           let fData = this.formatBouGraph(data);
           this.estimatedData.push(fData.estimatedTicketSize);
-          this.finishedData.push(fData.finishedTicketFuterSize > 0 ? fData.finishedTicketSize -fData.finishedTicketFuterSize :fData.finishedTicketSize);
+          this.finishedData.push(fData.finishedTicketFuterSize > 0 ? fData.finishedTicketSize - fData.finishedTicketFuterSize : fData.finishedTicketSize);
           this.finishedFutureData.push(fData.finishedTicketFuterSize);
 
         }
@@ -47,7 +47,7 @@
         labels: [],
         estimatedData: [],
         finishedData: [],
-        finishedFutureData:[]
+        finishedFutureData: []
       }
     },
     methods: {
@@ -89,10 +89,7 @@
 
 <style>
   .ticket-container {
-    min-height: 100vh;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+    width: 100%;
   }
 
   .ticket-title {
@@ -103,12 +100,13 @@
     font-size: 24px;
     color: #35495e;
     letter-spacing: 1px;
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
   }
 
   .bar-chart {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
+    width: 70vh;
+    margin: 20px auto 20px;
   }
 </style>
