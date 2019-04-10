@@ -1,18 +1,22 @@
 <template>
 
-  <section class="line-container">
-    <div>
-      <h1
-        class="line-title"
-      >[{{ $store.state.chartName }}] {{ $store.state.projectName }} <br> {{ $store.state.milestoneName }}
-      </h1>
-
-      <div v-for="lineData in user" :key="lineData.name">
-        <div class="line-chart">
-          <h2>{{lineData.name}}</h2>
-          <LineChart :data="writeLineChart(lineData)" :options="lineOptions()"></LineChart>
-          <br>
-          <div style="text-align: center; margin: 0 auto;">
+  <section>
+    <el-row type="flex" class="row-bg">
+      <el-col :span="1"></el-col>
+      <el-col :span="22">
+        <h1 class="line-title">
+          [{{ $store.state.chartName }}] {{ $store.state.projectName }} <br> {{
+          $store.state.milestoneName }}
+        </h1>
+      </el-col>
+      <el-col :span="1"></el-col>
+    </el-row>
+    <div v-for="lineData in user" :key="lineData.name">
+      <br><br>
+      <div class="line-chart">
+        <el-row type="flex" class="row-bg">
+          <el-col :span="10">
+            <h2 class="user-name">{{lineData.name}}</h2>
             <el-table
               :data="lineData.data.tableData"
               style="width: 100%">
@@ -36,10 +40,14 @@
                 label="差額">
               </el-table-column>
             </el-table>
-          </div>
-        </div>
+          </el-col>
+          <el-col :span="14">
+            <LineChart :data="writeLineChart(lineData)" :options="lineOptions()"></LineChart>
+          </el-col>
+        </el-row>
       </div>
     </div>
+
 
   </section>
 </template>
@@ -56,21 +64,17 @@
     components: {
       LineChart
     },
-    props: {
-      p_labels: [],
-      p_estimatedData: [],
-      p_finishedData: [],
-      p_safetyLine: [],
-      p_warningLine: [],
-      p_maxLine: [],
-      p_expectData: []
-    },
     data() {
       return {
         user: []
       };
     },
-
+    beforeCreate(){
+      if(!this.$store.state.milestoneId){
+        console.log('直接アクセスされたのでトップに移動します');
+        this.$router.push('/');
+      }
+    },
     async mounted() {
       //ユーザーの一覧を取得する
       //ユーザーデータを取得する
@@ -79,7 +83,7 @@
       (async () => {
           for (let user of userData) {
             let issueData = await this.getAllIssueData(user.id);
-            let formatedData = this.formatBarUp(issueData);
+            let formatedData = this.formatBarUp(issueData, true);
 
             if (formatedData !== 0) {
               if (formatedData.labels.length !== 0) {
@@ -103,21 +107,6 @@
           }
         }
       )();
-
-      console.log(this.user);
-      // //mixin のメソッドを使用してデータを作成します
-      // let issueData = await this.getAllIssueData();
-      // let formatedData = this.formatBarUp(issueData);
-      //
-      //   this.$data.tableData = this.createTableData(formatedData)
-      //
-      // } else {
-      //   this.$message({
-      //     message:
-      //       "データを出力するには、チケットに開始日、終了日、予定工数、完了工数を入力してください。。",
-      //     type: "warning"
-      //   });
-      // }
 
     }
     ,
@@ -199,63 +188,13 @@
       lineOptions: function () {
         return {};
       }
-      ,
-      /**
-       * 金額表を作成する
-       * @param formatedData データ
-       * @returns {*[]}
-       */
-      createTableData: function (formatedData) {
-        let nowDate = new Date();
-        let indexNum = formatedData.labels.indexOf((nowDate.getMonth() + 1) + '/' + nowDate.getDate());
 
-        let expectMoney = formatedData.expectData[formatedData.expectData.length - 1] * localStorage.hourlySalary * 10000;
-        let fullEstimatedMoney = formatedData.estimatedData[formatedData.estimatedData.length - 1] * localStorage.hourlySalary * 10000;
-        let estimatedMoney = 0;
-        let finishedMoney = 0;
-        let title = '';
-
-        if (indexNum < 0) {
-          title = '予定金額';
-          estimatedMoney = formatedData.estimatedData[formatedData.estimatedData.length - 1] * localStorage.hourlySalary * 10000;
-          finishedMoney = formatedData.finishedData[formatedData.finishedData.length - 1] * localStorage.hourlySalary * 10000;
-
-        } else {
-          title = `予定金額 (${(nowDate.getMonth() + 1) + '/' + nowDate.getDate()})時点`;
-          estimatedMoney = formatedData.estimatedData[indexNum] * localStorage.hourlySalary * 10000;
-          finishedMoney = formatedData.finishedData[indexNum] * localStorage.hourlySalary * 10000;
-        }
-
-        return [{
-          title: title,
-          estimatedMoney: estimatedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
-          finishedMoney: finishedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
-          difference: (estimatedMoney - finishedMoney).toLocaleString('ja-JP', {
-            "style": "currency",
-            "currency": "JPY"
-          }),
-        }, {
-          title: '予想金額',
-          estimatedMoney: fullEstimatedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
-          finishedMoney: expectMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
-          difference: (fullEstimatedMoney - expectMoney).toLocaleString('ja-JP', {
-            "style": "currency",
-            "currency": "JPY"
-          }),
-        }];
-      }
     }
   }
   ;
 </script>
 
 <style>
-  .line-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
 
   .line-title {
     font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont,
@@ -265,9 +204,20 @@
     font-size: 24px;
     color: #35495e;
     letter-spacing: 1px;
+    text-align: center;
+    margin-top: 20px;
   }
 
   .line-chart {
+    height: 120vh;
+    width: 90%;
     margin: 0 auto;
+  }
+
+  .row-bg .el-col {
+    background-color: unset;
+  }
+  .user-name{
+    margin-left: 50px;
   }
 </style>

@@ -1,12 +1,7 @@
 <template>
   <el-row>
-    <el-col :span="1" class="header-table">
-      <div class="header-col">
-        <!--<img class="header-col-icon" alt="backlogBI" src="~/assets/images/backlog_icon.png"/> -->
-      </div>
-    </el-col>
-    <el-col :span="3" class="header-table">
-      <div class="header-col">Backlog BI</div>
+    <el-col :span="4" class="header-table">
+      <div class="header-col header-col-title">Backlog BI</div>
     </el-col>
     <el-col :span="4">
       <div class="header-col header-col__select">
@@ -128,6 +123,9 @@
   font-weight: bold;
   font-size: 16px;
 }
+  .header-col-title {
+    padding: 10px;
+  }
 </style>
 <script>
 export default {
@@ -323,6 +321,11 @@ export default {
         {
           value: "finish_ticket_chart",
           label: "チケット消化状況"
+        },
+
+        {
+          value: "combo_chart_user",
+          label: "複合評価（個別）"
         }
       ],
       chartId: "",

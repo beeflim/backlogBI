@@ -42,7 +42,6 @@
 
 <script>
   import LineChart from "@/components/chart/LineChart.vue";
-  import Vue from "vue";
   import ReadIssueData from "@/components/methods/ReadIssueData.vue";
   import FormatBarData from "@/components/methods/FormatBarData.vue";
 
@@ -51,31 +50,29 @@
     components: {
       LineChart
     },
-    props: {
-      p_labels: [],
-      p_estimatedData: [],
-      p_finishedData: [],
-      p_safetyLine: [],
-      p_warningLine: [],
-      p_maxLine: [],
-      p_expectData: []
-    },
     data() {
       return {
-        labels: this.p_labels,
-        estimatedData: this.p_estimatedData,
-        finishedData: this.p_finishedData,
-        safetyLine: this.p_safetyLine,
-        warningLine: this.p_warningLine,
-        maxLine: this.p_maxLine,
-        expectData: this.p_expectData,
+        labels: [],
+        estimatedData: [],
+        finishedData: [],
+        safetyLine: [],
+        warningLine: [],
+        maxLine: [],
+        expectData: [],
         tableData: []
       };
     },
+    beforeCreate(){
+      if(!this.$store.state.milestoneId){
+        console.log('直接アクセスされたのでトップに移動します');
+        this.$router.push('/');
+      }
+    },
     async mounted() {
+
       //mixin のメソッドを使用してデータを作成します
       let issueData = await this.getAllIssueData();
-      let formatedData = this.formatBarUp(issueData);
+      let formatedData = this.formatBarUp(issueData,false);
       if (formatedData !== 0) {
         this.$data.labels = formatedData.labels;
         this.$data.estimatedData = formatedData.estimatedData;
@@ -95,8 +92,7 @@
         });
       }
 
-    }
-    ,
+    },
     methods: {
       /**
        * チャートの色などを指定する
@@ -173,45 +169,6 @@
       },
       lineOptions: function () {
         return {};
-      },
-      createTableData: function (formatedData) {
-        let nowDate = new Date();
-        let indexNum = formatedData.labels.indexOf((nowDate.getMonth() + 1) + '/' + nowDate.getDate());
-
-        let expectMoney = formatedData.expectData[formatedData.expectData.length - 1] * localStorage.hourlySalary * 10000;
-        let fullEstimatedMoney = formatedData.estimatedData[formatedData.estimatedData.length - 1] * localStorage.hourlySalary * 10000;
-        let estimatedMoney = 0;
-        let finishedMoney = 0;
-        let title = '';
-
-        if (indexNum < 0) {
-          title = '予定金額';
-          estimatedMoney = formatedData.estimatedData[formatedData.estimatedData.length - 1] * localStorage.hourlySalary * 10000;
-          finishedMoney = formatedData.finishedData[formatedData.finishedData.length - 1] * localStorage.hourlySalary * 10000;
-
-        } else {
-          title = `予定金額 (${(nowDate.getMonth() + 1) + '/' + nowDate.getDate()})時点`;
-          estimatedMoney = formatedData.estimatedData[indexNum] * localStorage.hourlySalary * 10000;
-          finishedMoney = formatedData.finishedData[indexNum] * localStorage.hourlySalary * 10000;
-        }
-
-        return [{
-          title: title,
-          estimatedMoney: estimatedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
-          finishedMoney: finishedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
-          difference: (estimatedMoney - finishedMoney).toLocaleString('ja-JP', {
-            "style": "currency",
-            "currency": "JPY"
-          }),
-        }, {
-          title: '予想金額',
-          estimatedMoney: fullEstimatedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
-          finishedMoney: expectMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
-          difference: (fullEstimatedMoney - expectMoney).toLocaleString('ja-JP', {
-            "style": "currency",
-            "currency": "JPY"
-          }),
-        }];
       }
     }
   }

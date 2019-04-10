@@ -15,11 +15,18 @@
   import ReadUserData from "@/components/methods/ReadUserData.vue";
   import BarChart from "@/components/chart/BarChart.vue";
   import ReadIssueData from "@/components/methods/ReadIssueData.vue";
+  import FormatBarData from "@/components/methods/FormatBarData.vue";
 
   export default {
-    mixins: [ReadUserData, ReadIssueData],
+    mixins: [ReadUserData, ReadIssueData, FormatBarData],
     components: {
       BarChart
+    },
+    beforeCreate(){
+      if(!this.$store.state.milestoneId){
+        console.log('直接アクセスされたのでトップに移動します');
+        this.$router.push('/');
+      }
     },
     async mounted() {
       //ユーザーデータを取得する
@@ -32,7 +39,11 @@
       (async () => {
         for (let user of userData) {
           let data = await this.getAllIssueData(user.id);
-          this.format(data);
+          let fData = this.formatBouGraph(data);
+          this.estimatedData.push(fData.estimatedTicketSize);
+          this.finishedData.push(fData.finishedTicketFuterSize > 0 ? fData.finishedTicketSize - fData.finishedTicketFuterSize : fData.finishedTicketSize);
+          this.finishedFutureData.push(fData.finishedTicketFuterSize);
+
         }
       })();
 
@@ -41,34 +52,11 @@
       return {
         labels: [],
         estimatedData: [],
-        finishedData: []
+        finishedData: [],
+        finishedFutureData: []
       }
     },
     methods: {
-      format: function (issueData) {
-
-        let nowDate = new Date();
-
-        let estimatedSize = 0;
-        let finishedSize = 0;
-
-        Object.values(issueData).forEach(issue => {
-          if (issue.dueDate) {
-            //現在日までの予定工数の合計
-            let due = issue.dueDate.substring(0, 10).split('-');
-            let dueDate = new Date(due[0], due[1] - 1, due[2]);
-            if (dueDate <= nowDate) {
-              estimatedSize += issue.estimatedHours;
-            }
-          }
-          //現在の完了工数
-          if (issue.status.name === "完了") {
-            finishedSize += issue.actualHours;
-          }
-        });
-        this.estimatedData.push(Math.round(estimatedSize * 100) / 100);
-        this.finishedData.push(Math.round(finishedSize * 100) / 100);
-      },
       writeBarChart: function () {
         let nowDate = new Date();
         return {
@@ -81,10 +69,16 @@
               data: this.$data.estimatedData
             },
             {
-              label: '実績',
+              label: `予定(${nowDate.getMonth() + 1}/${nowDate.getDate()})以前`,
               borderColor: 'rgba(86,167,100,1)',
               backgroundColor: 'rgba(86,167,100,0.4)',
               data: this.$data.finishedData
+            },
+            {
+              label: `予定(${nowDate.getMonth() + 1}/${nowDate.getDate()})以降`,
+              borderColor: 'rgb(33, 144, 255,1)',
+              backgroundColor: 'rgb(33, 144, 255,0.4)',
+              data: this.$data.finishedFutureData
             }
           ]
 
@@ -101,10 +95,7 @@
 
 <style>
   .ticket-container {
-    min-height: 100vh;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+    width: 100%;
   }
 
   .ticket-title {
@@ -115,12 +106,13 @@
     font-size: 24px;
     color: #35495e;
     letter-spacing: 1px;
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
   }
 
   .bar-chart {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
+    width: 70vh;
+    margin: 20px auto 20px;
   }
 </style>

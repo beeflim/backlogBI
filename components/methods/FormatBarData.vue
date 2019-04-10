@@ -169,11 +169,12 @@
       },
       /**
        * 安全、危険のラインを引く
-       * @param labels
-       * @param estimatedData
-       * @param finishedData
+       * @param labels ラベル（日付）
+       * @param estimatedData 予定データ
+       * @param finishedData 完了データ
+       * @param expectData 予想データ
        */
-      formatBarUpSupportData: function (labels, estimatedData, finishedData) {
+      formatBarUpSupportData: function (labels, estimatedData, finishedData, expectData, isOneUser) {
         let safetyLine = [];
         let warningLine = [];
         let maxLine = [];
@@ -185,8 +186,9 @@
 
         //安全性の曲線の初期値
         //TODO 要調整
-        const BASE_NUM = estimatedData[estimatedData.length - 1] / 3;
-        const WARN_BASE_NUM = estimatedData[estimatedData.length - 1] / 8;
+        const SYOKICHI = isOneUser ? 10 : 30;
+        const BASE_NUM = estimatedData[estimatedData.length - 1] / estimatedData.length > SYOKICHI ? SYOKICHI : estimatedData[estimatedData.length - 1] / 3;
+        const WARN_BASE_NUM = estimatedData[estimatedData.length - 1] / estimatedData.length > SYOKICHI ? SYOKICHI : estimatedData[estimatedData.length - 1];
 
         //安全性と危険性のラインを作成する。
         for (let i = 0; i < labels.length; i++) {
@@ -203,13 +205,24 @@
             ? estimatedData[estimatedData.length - 1]
             : finishedData[finishedData.length - 1];
 
-        //TODO 要調整
-        const MAX_NUM_BASE = 20;
-        maxNum = Math.floor(maxNum / MAX_NUM_BASE) * MAX_NUM_BASE + MAX_NUM_BASE;
-        maxNum =
-          warningLine[warningLine.length - 1] > maxNum
-            ? warningLine[warningLine.length - 1] + MAX_NUM_BASE
-            : maxNum;
+        maxNum = expectData[expectData.length - 1] > maxNum ? expectData[expectData.length - 1] : maxNum;
+
+        let addNumber = 20;
+
+        if (maxNum <= 200) {
+          addNumber = 20;
+        } else if (maxNum <= 500) {
+          addNumber = 50;
+        } else if (maxNum <= 1000) {
+          addNumber = 100;
+        } else if (maxNum <= 1500) {
+          addNumber = 200;
+        } else if (maxNum <= 2000) {
+          addNumber = 300;
+        } else {
+          addNumber = 400;
+        }
+        maxNum += addNumber;
         labels.forEach(() => {
           maxLine.push(maxNum);
         });
@@ -226,7 +239,7 @@
        *
        * @param issueData APIで取得した課題データ
        */
-      formatBarUp: function (issueData) {
+      formatBarUp: function (issueData, isOneUser) {
         //メインデータを取得する
         let mainData = this.formatBarUpMainData(issueData);
         if (mainData === 0) {
@@ -261,7 +274,9 @@
         let supportData = this.formatBarUpSupportData(
           labels,
           estimatedData,
-          finishedData
+          finishedData,
+          expectData,
+          isOneUser
         );
 
         let safetyLine = supportData.safetyLine;
@@ -278,6 +293,100 @@
           expectData: expectData
         };
       }
+      ,
+      /**
+       * 課題の棒グラフを表示するように課題データを整形する
+       * @param issueData 課題データ
+       */
+      formatBouGraph: function (issueData) {
+
+        let nowDate = new Date();
+
+        let estimatedSize = 0;
+        let finishedSize = 0;
+        let finishedFutureSize = 0;
+        let estimatedTicketSize = 0;
+        let finishedTicketSize = 0;
+        let finishedTicketFuterSize = 0;
+
+        Object.values(issueData).forEach(issue => {
+          if (issue.dueDate) {
+            //現在日までの予定工数の合計
+            let due = issue.dueDate.substring(0, 10).split('-');
+            let dueDate = new Date(due[0], due[1] - 1, due[2]);
+            if (dueDate <= nowDate) {
+              estimatedSize += issue.estimatedHours;
+              estimatedTicketSize++;
+            } else {
+              if (issue.status.name === "完了") {
+                finishedFutureSize += issue.actualHours;
+                finishedTicketFuterSize++;
+              }
+            }
+          }
+          //現在の完了工数
+          if (issue.status.name === "完了") {
+            finishedSize += issue.actualHours;
+            finishedTicketSize++;
+          }
+        });
+
+        return {
+          estimatedSize: Math.round(estimatedSize * 100) / 100,
+          finishedSize: Math.round(finishedSize * 100) / 100,
+          estimatedTicketSize,
+          finishedTicketSize,
+          finishedFutureSize,
+          finishedTicketFuterSize
+
+        };
+      }
+      ,
+      /**
+       * 金額表を作成する
+       * @param formatedData データ
+       * @returns {*[]}
+       */
+      createTableData: function (formatedData) {
+        let nowDate = new Date();
+        let indexNum = formatedData.labels.indexOf((nowDate.getMonth() + 1) + '/' + nowDate.getDate());
+
+        let expectMoney = formatedData.expectData[formatedData.expectData.length - 1] * localStorage.hourlySalary * 10000;
+        let fullEstimatedMoney = formatedData.estimatedData[formatedData.estimatedData.length - 1] * localStorage.hourlySalary * 10000;
+        let estimatedMoney = 0;
+        let finishedMoney = 0;
+        let title = '';
+
+        if (indexNum < 0) {
+          title = '予定金額';
+          estimatedMoney = formatedData.estimatedData[formatedData.estimatedData.length - 1] * localStorage.hourlySalary * 10000;
+          finishedMoney = formatedData.finishedData[formatedData.finishedData.length - 1] * localStorage.hourlySalary * 10000;
+
+        } else {
+          title = `予定金額 (${(nowDate.getMonth() + 1) + '/' + nowDate.getDate()})時点`;
+          estimatedMoney = formatedData.estimatedData[indexNum] * localStorage.hourlySalary * 10000;
+          finishedMoney = formatedData.finishedData[indexNum] * localStorage.hourlySalary * 10000;
+        }
+
+        return [{
+          title: title,
+          estimatedMoney: estimatedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
+          finishedMoney: finishedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
+          difference: (estimatedMoney - finishedMoney).toLocaleString('ja-JP', {
+            "style": "currency",
+            "currency": "JPY"
+          }),
+        }, {
+          title: '予想金額',
+          estimatedMoney: fullEstimatedMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
+          finishedMoney: expectMoney.toLocaleString('ja-JP', {"style": "currency", "currency": "JPY"}),
+          difference: (fullEstimatedMoney - expectMoney).toLocaleString('ja-JP', {
+            "style": "currency",
+            "currency": "JPY"
+          }),
+        }];
+      }
     }
-  };
+  }
+  ;
 </script>
