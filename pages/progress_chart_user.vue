@@ -1,18 +1,22 @@
 <template>
 
-  <section class="line-container">
-    <div>
-      <h1
-        class="line-title"
-      >[{{ $store.state.chartName }}] {{ $store.state.projectName }} <br> {{ $store.state.milestoneName }}
-      </h1>
-
-      <div v-for="lineData in user" :key="lineData.name">
-        <div class="line-chart">
-          <h2>{{lineData.name}}</h2>
-          <LineChart :data="writeLineChart(lineData)" :options="lineOptions()"></LineChart>
-          <br>
-          <div style="text-align: center; margin: 0 auto;">
+  <section>
+    <el-row type="flex" class="row-bg">
+      <el-col :span="1"></el-col>
+      <el-col :span="22">
+        <h1 class="line-title">
+          [{{ $store.state.chartName }}] {{ $store.state.projectName }} <br> {{
+          $store.state.milestoneName }}
+        </h1>
+      </el-col>
+      <el-col :span="1"></el-col>
+    </el-row>
+    <div v-for="lineData in user" :key="lineData.name">
+      <br><br>
+      <div class="line-chart">
+        <el-row type="flex" class="row-bg">
+          <el-col :span="10">
+            <h2 class="user-name">{{lineData.name}}</h2>
             <el-table
               :data="lineData.data.tableData"
               style="width: 100%">
@@ -36,10 +40,14 @@
                 label="差額">
               </el-table-column>
             </el-table>
-          </div>
-        </div>
+          </el-col>
+          <el-col :span="14">
+            <LineChart :data="writeLineChart(lineData)" :options="lineOptions()"></LineChart>
+          </el-col>
+        </el-row>
       </div>
     </div>
+
 
   </section>
 </template>
@@ -70,7 +78,7 @@
       (async () => {
           for (let user of userData) {
             let issueData = await this.getAllIssueData(user.id);
-            let formatedData = this.formatBarUp(issueData,true);
+            let formatedData = this.formatBarUp(issueData, true);
 
             if (formatedData !== 0) {
               if (formatedData.labels.length !== 0) {
@@ -182,12 +190,6 @@
 </script>
 
 <style>
-  .line-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-  }
 
   .line-title {
     font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont,
@@ -197,9 +199,20 @@
     font-size: 24px;
     color: #35495e;
     letter-spacing: 1px;
+    text-align: center;
+    margin-top: 20px;
   }
 
   .line-chart {
+    height: 120vh;
+    width: 90%;
     margin: 0 auto;
+  }
+
+  .row-bg .el-col {
+    background-color: unset;
+  }
+  .user-name{
+    margin-left: 50px;
   }
 </style>
