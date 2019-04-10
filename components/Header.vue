@@ -1,7 +1,7 @@
 <template>
   <el-row>
     <el-col :span="4" class="header-table">
-      <div class="header-col">Backlog BI</div>
+      <div class="header-col header-col-title">Backlog BI</div>
     </el-col>
     <el-col :span="4">
       <div class="header-col header-col__select">
@@ -123,6 +123,9 @@
   font-weight: bold;
   font-size: 16px;
 }
+  .header-col-title {
+    padding: 10px;
+  }
 </style>
 <script>
 export default {
