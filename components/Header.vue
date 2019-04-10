@@ -1,11 +1,6 @@
 <template>
   <el-row>
-    <el-col :span="1" class="header-table">
-      <div class="header-col">
-        <!--<img class="header-col-icon" alt="backlogBI" src="~/assets/images/backlog_icon.png"/> -->
-      </div>
-    </el-col>
-    <el-col :span="3" class="header-table">
+    <el-col :span="4" class="header-table">
       <div class="header-col">Backlog BI</div>
     </el-col>
     <el-col :span="4">
