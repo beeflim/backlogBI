@@ -2,6 +2,16 @@
 
 Summarize the backlog task status into a chart
 
+## how to use
+1. install npm or yarn
+2. type `npm install`
+3. type `npm run dev`
+4. open `http://localhost:3000`
+
+## how to build
+ 
+1. type `npm build`
+
 ## used library
 
 | name | url |
