@@ -22,6 +22,12 @@
     components: {
       BarChart
     },
+    beforeCreate(){
+      if(!this.$store.state.milestoneId){
+        console.log('直接アクセスされたのでトップに移動します');
+        this.$router.push('/');
+      }
+    },
     async mounted() {
       //ユーザーデータを取得する
       let userData = await this.getProjectUsers(this.$store.state.projectId);

@@ -88,7 +88,12 @@
         user: []
       };
     },
-
+    beforeCreate(){
+      if(!this.$store.state.milestoneId){
+        console.log('直接アクセスされたのでトップに移動します');
+        this.$router.push('/');
+      }
+    },
     async mounted() {
       //ユーザーの一覧を取得する
       //ユーザーデータを取得する

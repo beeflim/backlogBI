@@ -62,7 +62,14 @@
         tableData: []
       };
     },
+    beforeCreate(){
+      if(!this.$store.state.milestoneId){
+        console.log('直接アクセスされたのでトップに移動します');
+        this.$router.push('/');
+      }
+    },
     async mounted() {
+
       //mixin のメソッドを使用してデータを作成します
       let issueData = await this.getAllIssueData();
       let formatedData = this.formatBarUp(issueData,false);
@@ -85,8 +92,7 @@
         });
       }
 
-    }
-    ,
+    },
     methods: {
       /**
        * チャートの色などを指定する
