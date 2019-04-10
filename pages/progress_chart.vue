@@ -65,7 +65,7 @@
     async mounted() {
       //mixin のメソッドを使用してデータを作成します
       let issueData = await this.getAllIssueData();
-      let formatedData = this.formatBarUp(issueData);
+      let formatedData = this.formatBarUp(issueData,false);
       if (formatedData !== 0) {
         this.$data.labels = formatedData.labels;
         this.$data.estimatedData = formatedData.estimatedData;

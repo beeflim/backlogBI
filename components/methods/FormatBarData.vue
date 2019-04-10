@@ -169,11 +169,12 @@
       },
       /**
        * 安全、危険のラインを引く
-       * @param labels
-       * @param estimatedData
-       * @param finishedData
+       * @param labels ラベル（日付）
+       * @param estimatedData 予定データ
+       * @param finishedData 完了データ
+       * @param expectData 予想データ
        */
-      formatBarUpSupportData: function (labels, estimatedData, finishedData) {
+      formatBarUpSupportData: function (labels, estimatedData, finishedData, expectData, isOneUser) {
         let safetyLine = [];
         let warningLine = [];
         let maxLine = [];
@@ -185,8 +186,9 @@
 
         //安全性の曲線の初期値
         //TODO 要調整
-        const BASE_NUM = estimatedData[estimatedData.length - 1] / 3;
-        const WARN_BASE_NUM = estimatedData[estimatedData.length - 1] / 8;
+        const SYOKICHI = isOneUser ? 10 : 30;
+        const BASE_NUM = estimatedData[estimatedData.length - 1] / estimatedData.length > SYOKICHI ? SYOKICHI : estimatedData[estimatedData.length - 1] / 3;
+        const WARN_BASE_NUM = estimatedData[estimatedData.length - 1] / estimatedData.length > SYOKICHI ? SYOKICHI : estimatedData[estimatedData.length - 1];
 
         //安全性と危険性のラインを作成する。
         for (let i = 0; i < labels.length; i++) {
@@ -203,13 +205,24 @@
             ? estimatedData[estimatedData.length - 1]
             : finishedData[finishedData.length - 1];
 
-        //TODO 要調整
-        const MAX_NUM_BASE = 20;
-        maxNum = Math.floor(maxNum / MAX_NUM_BASE) * MAX_NUM_BASE + MAX_NUM_BASE;
-        maxNum =
-          warningLine[warningLine.length - 1] > maxNum
-            ? warningLine[warningLine.length - 1] + MAX_NUM_BASE
-            : maxNum;
+        maxNum = expectData[expectData.length - 1] > maxNum ? expectData[expectData.length - 1] : maxNum;
+
+        let addNumber = 20;
+
+        if (maxNum <= 200) {
+          addNumber = 20;
+        } else if (maxNum <= 500) {
+          addNumber = 50;
+        } else if (maxNum <= 1000) {
+          addNumber = 100;
+        } else if (maxNum <= 1500) {
+          addNumber = 200;
+        } else if (maxNum <= 2000) {
+          addNumber = 300;
+        } else {
+          addNumber = 400;
+        }
+        maxNum += addNumber;
         labels.forEach(() => {
           maxLine.push(maxNum);
         });
@@ -226,7 +239,7 @@
        *
        * @param issueData APIで取得した課題データ
        */
-      formatBarUp: function (issueData) {
+      formatBarUp: function (issueData, isOneUser) {
         //メインデータを取得する
         let mainData = this.formatBarUpMainData(issueData);
         if (mainData === 0) {
@@ -261,7 +274,9 @@
         let supportData = this.formatBarUpSupportData(
           labels,
           estimatedData,
-          finishedData
+          finishedData,
+          expectData,
+          isOneUser
         );
 
         let safetyLine = supportData.safetyLine;
@@ -277,7 +292,8 @@
           maxLine: maxLine,
           expectData: expectData
         };
-      },
+      }
+      ,
       /**
        * 課題の棒グラフを表示するように課題データを整形する
        * @param issueData 課題データ
@@ -301,7 +317,7 @@
             if (dueDate <= nowDate) {
               estimatedSize += issue.estimatedHours;
               estimatedTicketSize++;
-            }else{
+            } else {
               if (issue.status.name === "完了") {
                 finishedFutureSize += issue.actualHours;
                 finishedTicketFuterSize++;
@@ -324,7 +340,8 @@
           finishedTicketFuterSize
 
         };
-      },
+      }
+      ,
       /**
        * 金額表を作成する
        * @param formatedData データ
@@ -370,5 +387,6 @@
         }];
       }
     }
-  };
+  }
+  ;
 </script>

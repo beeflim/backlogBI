@@ -70,7 +70,7 @@
       (async () => {
           for (let user of userData) {
             let issueData = await this.getAllIssueData(user.id);
-            let formatedData = this.formatBarUp(issueData);
+            let formatedData = this.formatBarUp(issueData,true);
 
             if (formatedData !== 0) {
               if (formatedData.labels.length !== 0) {

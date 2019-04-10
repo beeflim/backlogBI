@@ -97,7 +97,7 @@
       (async () => {
           for (let user of userData) {
             let issueData = await this.getAllIssueData(user.id);
-            let formatedData = this.formatBarUp(issueData);
+            let formatedData = this.formatBarUp(issueData,true);
             let formatedBarData = this.formatBouGraph(issueData);
             //分析データを作成
             let analyzeData = await this.formatAnalyzeData(formatedBarData);
@@ -172,10 +172,10 @@
           timeAnalyze = 2
         }
         //ベロシティ
-        const VELOCITY_LIMIT_WARN = 1.3;
+        const VELOCITY_LIMIT_WARN = 1.4;
         let velocityAnalyze = 0;
         let velocity = Math.round((estimatedSize / finishedSize) * 100) / 100;
-        if (velocity <= 0) {
+        if (velocity <= 1) {
           velocityAnalyze = 0
         } else if (velocity < VELOCITY_LIMIT_WARN) {
           velocityAnalyze = 1
