@@ -10,7 +10,7 @@ Summarize the backlog task status into a chart
 
 ## how to build
  
-1. type `npm build`
+1. type `npm generate`
 
 ## used library
 
