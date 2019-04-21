@@ -8,7 +8,7 @@
        * @param userId 絞り込みたい担当者ID
        * @param fetchSize 一度に取得する課題の数
        */
-      getIssueData: async function (issueList, userId, fetchSize) {
+        getIssueData: async function (issueList, userId, fetchSize) {
         //一度に課題の数
         let getSize = fetchSize;
 

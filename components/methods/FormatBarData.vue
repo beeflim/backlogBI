@@ -206,6 +206,7 @@
             : finishedData[finishedData.length - 1];
 
         maxNum = expectData[expectData.length - 1] > maxNum ? expectData[expectData.length - 1] : maxNum;
+        maxNum = warningLine[warningLine.length - 1] > maxNum ? warningLine[warningLine.length - 1] : maxNum;
 
         let addNumber = 20;
 
