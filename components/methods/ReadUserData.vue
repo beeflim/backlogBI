@@ -13,6 +13,8 @@
           `?apiKey=${localStorage.token}`;
 
 
+        let userList = [];
+
         await this.$axios
           .$get(url)
           .then(res => {
@@ -27,8 +29,6 @@
             });
             console.log(e);
           });
-
-        let userList = [];
         return userList;
       }
     }
